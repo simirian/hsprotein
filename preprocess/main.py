@@ -109,7 +109,7 @@ def process_files(files: list[str]):
                 print("  adding H")
                 withh, _ = add_hydrogen(aaonly)
                 print("  added, relaxing H")
-                withh.coord = relax_hydrogen(withh)
+                withh.coord = relax_hydrogen(withh, iterations=10000)
                 print("  relaxed H")
             save_structure(withh_file, withh)
 
