@@ -7,8 +7,8 @@ import org.biojava.nbio.structure.Group;
 import org.biojava.nbio.structure.align.util.RotationAxis;
 
 public class Rotator {
-	static String[][] hardCodedDihedralAtoms = {{"C1", "C2", "C3", "O3"}};
-	static String[][] rotatedAtoms = {{"O3"}};
+	static String[][] hardCodedDihedralAtoms = {{"C1", "C2", "C3", "C4"}};
+	static String[][] rotatedAtoms = {{"C4"}};
 
 	public static void runSingleResidue(Group group) {
 		for (String[] dihedralAngleCarbons : hardCodedDihedralAtoms) {
@@ -18,7 +18,7 @@ public class Rotator {
 			Atom atom4 = group.getAtom(dihedralAngleCarbons[3]);
 
 			RotationAxis dihedralAxis = new RotationAxis(Calc.subtract(atom2, atom3), atom3, Math.toRadians(Calc.torsionAngle(atom1, atom2, atom3, atom4)));
-			dihedralAxis.rotate(new Atom[] {group.getAtom("O3")}, Math.toRadians(90));
+			dihedralAxis.rotate(new Atom[] {group.getAtom("C4")}, Math.toRadians(90));
 		}
 	}
 }
