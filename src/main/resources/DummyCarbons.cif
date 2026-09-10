@@ -37,7 +37,7 @@ loop_
    GOL C1 C CH2 0 -0.020 -0.0119 -0.0059 0.0191
    GOL C2 C CH1 0 0.087 -0.4684 0.0085 1.4959
    GOL C3 C CH2 0 -0.022 -2.0072 -0.1292 1.4373
-   GOL O3 O OH1 0 -0.303 -2.4550 -0.1866 2.7549
+   GOL C4 O OH1 0 -0.303 -2.4550 -0.1866 2.7549
 
 loop_
   _chem_comp_bond.comp_id
@@ -49,7 +49,7 @@ loop_
   _chem_comp_bond.value_dist_neutron
    GOL C1 C2 single 1.546 0.037 1.546
    GOL C2 C3 single 1.546 0.037 1.546
-   GOL C3 O3 single 1.393 0.034 1.393
+   GOL C3 C4 single 1.393 0.034 1.393
 
 loop_
   _chem_comp_angle.comp_id
@@ -59,7 +59,7 @@ loop_
   _chem_comp_angle.value_angle
   _chem_comp_angle.value_angle_esd
    GOL C3 C2 C1 104.88 2.394
-   GOL O3 C3 C2 106.72 2.610
+   GOL C4 C3 C2 106.72 2.610
 
 loop_
   _chem_comp_tor.comp_id
@@ -71,4 +71,4 @@ loop_
   _chem_comp_tor.value_angle
   _chem_comp_tor.value_angle_esd
   _chem_comp_tor.period
-   GOL Var_01 O3 C3 C2 C1 177.15 30.0 3
+   GOL Var_01 C4 C3 C2 C1 177.15 30.0 3
