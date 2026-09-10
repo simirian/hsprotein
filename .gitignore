@@ -12,6 +12,10 @@
 *.zip
 *.tar.gz
 *.rar
+*.gz
+
+# PowerShell Scripts
+*.ps1
 
 # Maven files and folders
 target/
@@ -27,3 +31,4 @@ buildNumber.properties
 # Other folders and file types
 .vscode
 protein_output
+chemcomp
