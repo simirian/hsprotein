@@ -1,55 +1,45 @@
 package edu.wpi.hsprotein;
 
-import edu.wpi.hsprotein.filemanager.ProteinManager;
-import edu.wpi.hsprotein.helpers.InputValidation;
-import edu.wpi.hsprotein.rotations.Rotator;
+import org.biojava.nbio.structure.Structure;
+import org.biojava.nbio.structure.gui.BiojavaJmol;
+import org.biojava.nbio.structure.io.CifFileReader;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
-import org.biojava.nbio.structure.Atom;
-import org.biojava.nbio.structure.Chain;
-import org.biojava.nbio.structure.Group;
+import edu.wpi.hsprotein.rotations.DihedralAngle;
 
 class Main {
-	public static void main(String[] args) {
-		// Check if input directory exists
-		String pathToInputFileDirectory = InputValidation.validateDirectory(args[0], "Invalid input directory path");
-		// Check if input file exists
-		String inputFileName = InputValidation.validateFile(pathToInputFileDirectory, args[1], "Invalid input file");
-		// Combine into a proper file path
-		String filepath = pathToInputFileDirectory + "/" + inputFileName;
-		// Check if Residue ID is a valid number
-		int residueID = InputValidation.validateInteger(args[2], "ResidueID");
-		// Check if output directory exists
-		String pathToOutputFileDirectory = InputValidation.validateDirectory(args[3], "Invalid output directory path");
-		// Check if only-dipeptide tag is a valid boolean (1 / 0)
-		Boolean dipeptideOnlyTag = InputValidation.validateNumericalBoolean(args[4], "dipeptideOnlyTag");
+  public static void main(String[] args) {
+    if (args.length < 3) {
+      System.out.println("Needs more args!\ncmd FILE RESIDUE NANGLE");
+      return;
+    }
+    String filepath = args[0];
 
-		// Avoid missing "PDB Directory" system property warning
-		if (System.getProperty("PDB_DIR") == null) {
-			System.setProperty("PDB_DIR", pathToInputFileDirectory);
-		}
+    Structure s;
+    try {
+      s = new CifFileReader().getStructure(filepath);
+    } catch (Exception e) {
+      System.out.println(e.getMessage());
+      System.out.println("Failed to load; aborting.");
+      return;
+    }
 
-		// Load input file into Protein File Manager
-		ProteinManager pManager = null;
-		try {
-			pManager = ProteinManager.load(filepath);
-		} catch (Exception e) {
-			InputValidation.handleImproperUserInput("Invalid input file type");
-		}
+    DihedralAngle[] angles = DihedralAngle.getDihedrals(args[1]);
+    int idx = Integer.parseInt(args[2]);
+    if (idx >= angles.length) {
+      System.out.println("Can't use angle " + idx + " in residue " + args[1] + "; it doesn't exist.");
+      return;
+    }
+    DihedralAngle angle = angles[idx];
 
-		// Extract structure from loaded file
-		for (Chain chain : pManager.getStructure().getChains()) {
-			for (Group group : chain.getAtomGroups()) {
-				List<Atom> atoms = group.getAtoms();
-				System.out.println("\nAtoms: " + atoms.stream().map(a -> a.getName()).collect(Collectors.joining(", ")) + "\n");
-
-				Rotator.runSingleResidue(group);
-			}
-		}
-
-		// Output rotated file
-		pManager.export(pathToOutputFileDirectory);
-	}
+    BiojavaJmol jmol = new BiojavaJmol();
+    jmol.setStructure(s);
+    jmol.evalString("hide !" + args[1]);
+    jmol.evalString("select *." + angle.a1() + " or *." + angle.a2() + "; color [x00ffff];");
+    for (String atom : angle.rotations())
+      jmol.evalString("select *." + atom + "; color [x44ff44];");
+    for (String atom : angle.clashesWith())
+      jmol.evalString("select *." + atom + "; color [xff4444];");
+    for (String atom : angle.mightClash())
+      jmol.evalString("select *." + atom + "; color [xffff00];");
+  }
 }
