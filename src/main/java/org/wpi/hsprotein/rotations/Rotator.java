@@ -12,12 +12,10 @@ public class Rotator {
 
 	public static void runSingleResidue(Group group) {
 		for (String[] dihedralAngleCarbons : hardCodedDihedralAtoms) {
-			Atom atom1 = group.getAtom(dihedralAngleCarbons[0]);
-			Atom atom2 = group.getAtom(dihedralAngleCarbons[1]);
-			Atom atom3 = group.getAtom(dihedralAngleCarbons[2]);
-			Atom atom4 = group.getAtom(dihedralAngleCarbons[3]);
+			Atom atom1 = group.getAtom(dihedralAngleCarbons[1]);
+			Atom atom2 = group.getAtom(dihedralAngleCarbons[2]);
 
-			RotationAxis dihedralAxis = new RotationAxis(Calc.subtract(atom2, atom3), atom3, Math.toRadians(Calc.torsionAngle(atom1, atom2, atom3, atom4)));
+			RotationAxis dihedralAxis = new RotationAxis(Calc.subtract(atom1, atom2), atom2, 0);
 			dihedralAxis.rotate(new Atom[] {group.getAtom("C4")}, Math.toRadians(90));
 		}
 	}
