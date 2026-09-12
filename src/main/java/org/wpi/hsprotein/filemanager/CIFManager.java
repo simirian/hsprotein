@@ -29,7 +29,7 @@ class CIFManager implements ProteinManager {
 	@Override public void export(String outputDirectory) {
 		// Find filename that doesn't exist in outputDirectory
 		int num = 0;
-		String structName = struct.getName().equals("") ? "rotatedProtein" : struct.getName();
+		String structName = struct.getName().equals("") ? "rotated_CIF_Protein" : struct.getName();
 		String filename = structName + ".cif";
 		File file = new File(outputDirectory, filename);
 		while(file.exists()) {

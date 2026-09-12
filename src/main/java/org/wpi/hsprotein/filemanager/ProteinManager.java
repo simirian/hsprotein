@@ -8,9 +8,9 @@ public interface ProteinManager {
 
 		String fileType = filename.substring(filename.lastIndexOf('.') + 1);
 		return switch (fileType) {
-				case "pdb" -> new PDBManager(filename);
-				case "cif" -> new CIFManager(filename);
-				default    -> throw new IllegalArgumentException("Unknown filetype: " + fileType);
+			case "pdb" -> new PDBManager(filename);
+			case "cif" -> new CIFManager(filename);
+			default    -> throw new IllegalArgumentException("Unknown filetype: " + fileType);
 		};
 	}
 

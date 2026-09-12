@@ -29,7 +29,7 @@ class PDBManager implements ProteinManager {
 	@Override public void export(String outputDirectory) {
 		// Find filename that doesn't exist in outputDirectory
 		int num = 0;
-		String structName = struct.getName().equals("") ? "rotatedProtein" : struct.getName();
+		String structName = struct.getName().equals("") ? "rotated_PDB_Protein" : struct.getName();
 		String filename = structName + ".pdb";
 		File file = new File(outputDirectory, filename);
 		while(file.exists()) {
