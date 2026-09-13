@@ -112,6 +112,24 @@ def add_h(cif: CIFFile) -> CIFFile:
     return cif_new_with(cif, s)
 
 
+def convert_d_to_h(s: AtomArray | AtomArrayStack):
+    """Converts deuterium atoms to hydrogen."""
+    np.putmask(s.element, s.element == "D", "H")
+    prefix = np.strings.replace(np.strings.slice(s.atom_name, 1), "D", "H")
+    suffix = np.strings.slice(s.atom_name, 1, None)
+    s.atom_name = np.strings.add(prefix, suffix)
+
+
+def fix_h(cif: CIFFile) -> CIFFile:
+    """Fixes hydrogen atoms in the structure by adding them or converting D to H."""
+    s = get_structure(cif)
+    if np.any(s.element == "D") or np.any(np.strings.startswith(s.atom_name, "D")):
+        convert_d_to_h(s)
+    if np.any(s.element == "H"):
+        return cif
+    return add_h(cif)
+
+
 def filter_chain(cif: CIFFile, chain_id: str) -> CIFFile:
     """Discards every chain excpt the one which whose ID is given."""
     s = get_structure(cif)
@@ -155,7 +173,7 @@ def process_files(files: list[str]) -> None:
         if not override and os.path.exists(withh_file):
             cif.read(withh_file)
         else:
-            cif = add_h(cif)
+            cif = fix_h(cif)
             cif.write(withh_file)
 
         fchain_file = name + "_fchain" + ext
