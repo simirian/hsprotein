@@ -1,15 +1,13 @@
 #!/usr/bin/env python
 
-"""Fetches PDB files and preprocesses them."""
-
 import os
 import sys
 from argparse import ArgumentParser
 
 import numpy as np
 from biotite.database.rcsb import fetch
-from biotite.structure import AtomArrayStack, filter_amino_acids
-from biotite.structure.io import load_structure, save_structure
+from biotite.structure import AtomArray, AtomArrayStack, filter_amino_acids, stack
+from biotite.structure.io.pdbx import CIFBlock, CIFFile, get_structure, set_structure
 from hydride import add_hydrogen, relax_hydrogen  # type: ignore
 
 infile: str
@@ -18,7 +16,7 @@ override: bool = False
 skip: int = 0
 
 
-def help():
+def help() -> None:
     """Print usage information."""
     print(
         "fetch.py\n\n"
@@ -61,72 +59,115 @@ def fetch_files() -> list[str]:
     return fetch(pdbids, "cif", outdir, verbose=True, overwrite=override)
 
 
-def process_files(files: list[str]):
+def cif_new_with(cif: CIFFile, structure: AtomArray | AtomArrayStack) -> CIFFile:
+    """Creates a new CIF file with metadata from the old file and a structure."""
+    new = CIFFile(
+        {
+            model: CIFBlock(
+                {
+                    "entity": cif[model]["entity"],
+                    "entity_poly": cif[model]["entity_poly"],
+                    "entity_poly_seq": cif[model]["entity_poly_seq"],
+                }
+            )
+            for model in cif.keys()  # noqa
+        }
+    )
+    set_structure(new, structure)
+    return new
+
+
+def remove_altlocs(cif: CIFFile) -> CIFFile:
+    """Filters out alternate locations from a CIF file."""
+    # reading the structure is enough to remove altlocs
+    s = get_structure(cif, extra_fields=["charge"])
+    return cif_new_with(cif, s)
+
+
+def filter_aa(cif: CIFFile) -> CIFFile:
+    """Filters a CIF file so it only contains amino acid residues."""
+    s = get_structure(cif, extra_fields=["charge"])
+    if isinstance(s, AtomArrayStack):
+        s = s[:, filter_amino_acids(s)]
+    else:
+        s = s[filter_amino_acids(s)]
+    return cif_new_with(cif, s)
+
+
+def add_h(cif: CIFFile) -> CIFFile:
+    """Uses Hydride to add hydrogen atoms to a model that doesn't have them."""
+    s = get_structure(cif, include_bonds=True, extra_fields=["charge"])
+    if np.any(s.element == "H"):
+        return cif
+    if isinstance(s, AtomArrayStack):
+        arrays = []
+        for a in s:
+            a, _ = add_hydrogen(a)
+            a.coord = relax_hydrogen(a, iterations=10000)
+            arrays.append(a)
+        s = stack(arrays)
+    else:
+        s, _ = add_hydrogen(s)
+        s.coord = relax_hydrogen(s, iterations=10000)
+    return cif_new_with(cif, s)
+
+
+def filter_chain(cif: CIFFile, chain_id: str) -> CIFFile:
+    """Discards every chain excpt the one which whose ID is given."""
+    s = get_structure(cif)
+    if isinstance(s, AtomArrayStack):
+        s = s[:, s.chain_id == chain_id]
+    else:
+        s = s[s.chain_id == chain_id]
+    return cif_new_with(cif, s)
+
+
+def process_files(files: list[str]) -> None:
     """Processes the fetched files."""
     with open(infile) as f:
         chains: dict[str, str] = {
             line.strip()[0:4]: line.strip().split(" ")[0][4:]
             for line in f.readlines()[skip:]
         }
+    print("\n")
     for file in files:
         pdbid = os.path.splitext(os.path.basename(file))[0]
         name, ext = os.path.splitext(os.path.normpath(file))
-        print("processing", pdbid)
+        print("\x1b[F\x1b[Kprocessing", pdbid)
 
-        # loading the file will automatically select only the first altloc of each atom
-        # bonds and charge are needed for hydride to function properly
+        cif: CIFFile = CIFFile.read(file)
+
         noalt_file = name + "_noalt" + ext
         if not override and os.path.exists(noalt_file):
-            noalt = None
+            cif.read(noalt_file)
         else:
-            noalt = load_structure(file, include_bonds=True, extra_fields=["charge"])
-            if isinstance(noalt, AtomArrayStack):
-                noalt = noalt.get_array(0)
-                save_structure(noalt_file, noalt)
-            else:
-                save_structure(noalt_file, noalt)
+            cif = remove_altlocs(cif)
+            cif.write(noalt_file)
 
         aaonly_file = name + "_aaonly" + ext
         if not override and os.path.exists(aaonly_file):
-            aaonly = None
+            cif.read(aaonly_file)
         else:
-            noalt = noalt or load_structure(
-                noalt_file, include_bonds=True, extra_fields=["charge"]
-            )
-            aaonly = noalt[filter_amino_acids(noalt)]
-            save_structure(aaonly_file, aaonly)
+            cif = filter_aa(cif)
+            cif.write(aaonly_file)
 
         withh_file = name + "_withh" + ext
         if not override and os.path.exists(withh_file):
-            withh = None
+            cif.read(withh_file)
         else:
-            aaonly = aaonly or load_structure(
-                aaonly_file, include_bonds=True, extra_fields=["charge"]
-            )
-            if np.any(aaonly.element == "H"):
-                withh = aaonly
-            else:
-                print("  adding H")
-                withh, _ = add_hydrogen(aaonly)
-                print("  added, relaxing H")
-                withh.coord = relax_hydrogen(withh, iterations=10000)
-                print("  relaxed H")
-            save_structure(withh_file, withh)
+            cif = add_h(cif)
+            cif.write(withh_file)
 
         fchain_file = name + "_fchain" + ext
         if not override and os.path.exists(fchain_file):
             pass
         else:
-            withh = withh or load_structure(withh_file)
-            fchain = (
-                withh[withh.chain_id == chains[pdbid]]
-                if (pdbid in chains and chains[pdbid] != "")
-                else withh
-            )
-            save_structure(fchain_file, fchain)
+            if pdbid in chains and chains[pdbid] != "":
+                cif = filter_chain(cif, chains[pdbid])
+            cif.write(fchain_file)
 
 
-def main():
+def main() -> None:
     global infile, outdir, override, skip
 
     parser = ArgumentParser()
