@@ -59,6 +59,13 @@ def fetch_files() -> list[str]:
     return fetch(pdbids, "cif", outdir, verbose=True, overwrite=override)
 
 
+def get_structure_data(cif: CIFFile) -> AtomArray | AtomArrayStack:
+    """Gets structure data from a cif file in a way that is compatible with Biojava."""
+    return get_structure(
+        cif, include_bonds=True, extra_fields=["charge", "B_iso_or_equiv"]
+    )
+
+
 def cif_new_with(cif: CIFFile, structure: AtomArray | AtomArrayStack) -> CIFFile:
     """Creates a new CIF file with metadata from the old file and a structure."""
     new = CIFFile(
@@ -68,25 +75,28 @@ def cif_new_with(cif: CIFFile, structure: AtomArray | AtomArrayStack) -> CIFFile
                     "entity": cif[model]["entity"],
                     "entity_poly": cif[model]["entity_poly"],
                     "entity_poly_seq": cif[model]["entity_poly_seq"],
+                    "struct_asym": cif[model]["struct_asym"],
                 }
             )
             for model in cif.keys()  # noqa
         }
     )
-    set_structure(new, structure)
+    for model in new.keys():  # noqa
+        new[model]["struct_asym"]["pdbx_modified"].as_array()[:] = "Y"
+    set_structure(new, structure, extra_fields=["B_iso_or_equiv"])
     return new
 
 
 def remove_altlocs(cif: CIFFile) -> CIFFile:
     """Filters out alternate locations from a CIF file."""
     # reading the structure is enough to remove altlocs
-    s = get_structure(cif, extra_fields=["charge"])
+    s = get_structure_data(cif)
     return cif_new_with(cif, s)
 
 
 def filter_aa(cif: CIFFile) -> CIFFile:
     """Filters a CIF file so it only contains amino acid residues."""
-    s = get_structure(cif, extra_fields=["charge"])
+    s = get_structure_data(cif)
     if isinstance(s, AtomArrayStack):
         s = s[:, filter_amino_acids(s)]
     else:
@@ -94,22 +104,17 @@ def filter_aa(cif: CIFFile) -> CIFFile:
     return cif_new_with(cif, s)
 
 
-def add_h(cif: CIFFile) -> CIFFile:
-    """Uses Hydride to add hydrogen atoms to a model that doesn't have them."""
-    s = get_structure(cif, include_bonds=True, extra_fields=["charge"])
-    if np.any(s.element == "H"):
-        return cif
-    if isinstance(s, AtomArrayStack):
-        arrays = []
-        for a in s:
-            a, _ = add_hydrogen(a)
-            a.coord = relax_hydrogen(a, iterations=10000)
-            arrays.append(a)
-        s = stack(arrays)
-    else:
-        s, _ = add_hydrogen(s)
-        s.coord = relax_hydrogen(s, iterations=10000)
-    return cif_new_with(cif, s)
+def add_h(structure: AtomArray | AtomArrayStack) -> AtomArray | AtomArrayStack:
+    """Uses Hydride to add hydrogen atoms to a structure that doesn't have them."""
+    if not isinstance(structure, AtomArrayStack):
+        structure = stack(structure)
+    arrays = []
+    for a in structure:
+        a, _ = add_hydrogen(a)
+        a.coord = relax_hydrogen(a, iterations=10000)
+        arrays.append(a)
+    structure = stack(arrays)
+    return structure
 
 
 def convert_d_to_h(s: AtomArray | AtomArrayStack):
@@ -122,17 +127,17 @@ def convert_d_to_h(s: AtomArray | AtomArrayStack):
 
 def fix_h(cif: CIFFile) -> CIFFile:
     """Fixes hydrogen atoms in the structure by adding them or converting D to H."""
-    s = get_structure(cif)
+    s = get_structure_data(cif)
     if np.any(s.element == "D") or np.any(np.strings.startswith(s.atom_name, "D")):
         convert_d_to_h(s)
     if np.any(s.element == "H"):
         return cif
-    return add_h(cif)
+    return cif_new_with(cif, add_h(s))
 
 
 def filter_chain(cif: CIFFile, chain_id: str) -> CIFFile:
     """Discards every chain excpt the one which whose ID is given."""
-    s = get_structure(cif)
+    s = get_structure_data(cif)
     if isinstance(s, AtomArrayStack):
         s = s[:, s.chain_id == chain_id]
     else:
