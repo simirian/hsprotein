@@ -122,7 +122,7 @@ def convert_d_to_h(s: AtomArray | AtomArrayStack):
     np.putmask(s.element, s.element == "D", "H")
     prefix = np.strings.replace(np.strings.slice(s.atom_name, 1), "D", "H")
     suffix = np.strings.slice(s.atom_name, 1, None)
-    s.atom_name = np.strings.add(prefix, suffix)
+    np.put(s.atom_name, range(s.atom_name.shape[0]), np.strings.add(prefix, suffix))
 
 
 def fix_h(cif: CIFFile) -> CIFFile:
