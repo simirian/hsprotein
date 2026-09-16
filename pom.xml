@@ -8,8 +8,8 @@
   <version>1.0-SNAPSHOT</version>
 
   <name>hsprotein</name>
-  <!-- FIXME change it to the project's website -->
-  <url>http://www.example.com</url>
+  <url>https://github.com/simirian/hsprotein</url>
+  <description>Analysis of proteins using a hard-sphere model.</description>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -55,7 +55,7 @@
     </dependency>
   </dependencies>
 
-    <build>
+  <build>
     <plugins>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
@@ -68,6 +68,26 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-assembly-plugin</artifactId>
+      </plugin>
+
+      <!-- Create a JavaDocs site within src/docs when package is compiled -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>3.11.2</version>
+        <configuration>
+          <outputDirectory>${project.build.directory}</outputDirectory>
+					<show>package</show>
+        </configuration>
+        <executions>
+          <execution>
+            <id>make-javadocs</id>
+            <phase>package</phase>
+            <goals>
+              <goal>javadoc</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
 
@@ -122,9 +142,9 @@
                 <mainClass>org.wpi.hsprotein.Main</mainClass>
               </manifest>
             </archive>
-						<descriptorRefs>
-							<descriptorRef>jar-with-dependencies</descriptorRef>
-						</descriptorRefs>
+            <descriptorRefs>
+              <descriptorRef>jar-with-dependencies</descriptorRef>
+            </descriptorRefs>
           </configuration>
           <executions>
             <execution>

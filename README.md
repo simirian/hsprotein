@@ -1,3 +1,4 @@
+# Running the Code
 To run the Maven code:
 `mvn clean package` cleans out any old target folders / build artifacts and then re-packages them
 ``mvn compile exec:java "-Dexec.args=`"pathToInputFileDirectory inputFileName residueID pathToOutputFileDirectory dipeptideOnlyTag`""`` to run the project in PowerShell (with escaped strings and tags)
@@ -6,3 +7,6 @@ To run the Maven code:
 - `ResidueID` ex: `123`
 - `pathToOutputFileDirectory` ex: `protein_output`
 - `dipeptideOnlyTag` ex: `1` (True) or `0` (False)
+
+# Javadocs
+After building, navigate to the `target/apidocs` folder and open `index.html` in a browser.
