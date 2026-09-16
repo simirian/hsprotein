@@ -6,10 +6,18 @@ import org.biojava.nbio.structure.Atom;
 import org.biojava.nbio.structure.Group;
 import org.biojava.nbio.structure.align.util.RotationAxis;
 
+/**
+ * A class containing all rotational operations. Will be greatly expanded in the future.
+ */
 public class Rotator {
 	static String[][] hardCodedDihedralAtoms = {{"C1", "C2", "C3", "C4"}};
 	static String[][] rotatedAtoms = {{"C4"}};
 
+	/**
+	 * Rotates a single residue 90°.
+	 *
+	 * @param group the group of atoms to rotate
+	 */
 	public static void runSingleResidue(Group group) {
 		for (String[] dihedralAngleCarbons : hardCodedDihedralAtoms) {
 			Atom atom1 = group.getAtom(dihedralAngleCarbons[1]);

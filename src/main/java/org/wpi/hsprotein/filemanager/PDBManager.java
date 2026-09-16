@@ -7,6 +7,10 @@ import java.io.IOException;
 import org.biojava.nbio.structure.io.PDBFileReader;
 import org.biojava.nbio.structure.Structure;
 
+/**
+ * {@inheritDoc}
+ * Handles {@code .pdb} files.
+ */
 class PDBManager implements ProteinManager {
 	String filepath = "";
 	PDBFileReader pdbReader = new PDBFileReader();
@@ -37,7 +41,7 @@ class PDBManager implements ProteinManager {
 			file = new File(outputDirectory, filename);
 		}
 
-		// Write to CIF file
+		// Write to PDB file
 		try (FileWriter writer = new FileWriter(file)) {
 			writer.write(struct.toPDB());
 		} catch (IOException e) {

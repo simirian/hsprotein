@@ -44,17 +44,7 @@ class Main {
 		for (Chain chain : pManager.getStructure().getChains()) {
 			for (Group group : chain.getAtomGroups()) {
 				List<Atom> atoms = group.getAtoms();
-
-				// Hardcode bonds for Dummy PDB file
-				if (args[1].equals("DummyCarbons.pdb")) {
-					new BondImpl(atoms.get(0), atoms.get(1),1);
-					new BondImpl(atoms.get(1), atoms.get(2),1);
-					new BondImpl(atoms.get(2), atoms.get(3),1);
-				}
-
-				System.out.println("There are " + atoms.size() + " atoms in " + group.getPDBName());
-				atoms.forEach(a -> System.out.println(a.getName() + " - [ " + a.getBonds() + " ]"));
-				System.out.println();
+				System.out.println("\nAtoms: " + atoms.stream().map(a -> a.getName()).collect(Collectors.joining(", ")) + "\n");
 
 				Rotator.runSingleResidue(group);
 			}

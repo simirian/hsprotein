@@ -5,16 +5,22 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 /**
- * Utility class for validating user command-line arguments, and directory / file existence.
+ * Utility class for validating user command-line arguments, and directory /
+ * file existence.
  */
 public final class InputValidation {
-	private InputValidation() {}
+	private InputValidation() {
+	}
 
-	/** 
-	 * Alerts the user of improper command line arguments in a consistent, formatted way.
-	 * 
-	 * <p><b>Critical Side Effect:</b> Terminates the program and displays a printout of the error.</p>
-	 * 
+	/**
+	 * Alerts the user of improper command line arguments in a consistent, formatted
+	 * way.
+	 *
+	 * <p>
+	 * <b>Critical Side Effect:</b> Terminates the program and displays a printout
+	 * of the error.
+	 * </p>
+	 *
 	 * @param errorMessage the error message to display to the user
 	 */
 	public static void handleImproperUserInput(String errorMessage) {
@@ -25,12 +31,15 @@ public final class InputValidation {
 
 	/**
 	 * Validates that the given path exists and points to an existing directory.
-	 * 
-	 * <p><b>Critical Side Effect:</b> If validation fails, this method halts application execution via {@link #handleImproperUserInput()}.</p>
+	 *
+	 * <p>
+	 * <b>Critical Side Effect:</b> If validation fails, this method halts
+	 * application execution via {@link #handleImproperUserInput(String)}.
+	 * </p>
 	 *
 	 * @param directoryPath the file system path to check
-	 * @param errorMessage the error message to display if validation fails
-	 * @return the verified directory path string
+	 * @param errorMessage  the error message to display if validation fails
+	 * @return The verified directory path string
 	 */
 	public static String validateDirectory(String directoryPath, String errorMessage) {
 		if (!Files.exists(Paths.get(directoryPath)) || !Files.isDirectory(Paths.get(directoryPath))) {
@@ -41,9 +50,9 @@ public final class InputValidation {
 
 	/**
 	 * Validates that the given path exists and points to an existing directory.
-	 * 
+	 *
 	 * @param directoryPath the file system path to check
-	 * @return the verified directory path string
+	 * @return The verified directory path string
 	 * @throws IllegalArgumentException if the directory does not exist
 	 */
 	public static String validateDirectory(String directoryPath) throws IllegalArgumentException {
@@ -55,13 +64,16 @@ public final class InputValidation {
 
 	/**
 	 * Validates that the given file exists within the provided directory.
-	 * 
-	 * <p><b>Critical Side Effect:</b> If validation fails, this method halts application execution via {@link #handleImproperUserInput()}.</p>
 	 *
-	 * @param filePath the file system path to check
-	 * @param fileName the file to check
+	 * <p>
+	 * <b>Critical Side Effect:</b> If validation fails, this method halts
+	 * application execution via {@link #handleImproperUserInput(String)}.
+	 * </p>
+	 *
+	 * @param filePath     the file system path to check
+	 * @param fileName     the file to check
 	 * @param errorMessage the error message to display if validation fails
-	 * @return the verified file name string
+	 * @return The verified file name string
 	 */
 	public static String validateFile(String filePath, String fileName, String errorMessage) {
 		try {
@@ -79,10 +91,10 @@ public final class InputValidation {
 	 *
 	 * @param filePath the file system path to check
 	 * @param fileName the file to check
-	 * @return the verified file name string
+	 * @return The verified file name string
 	 * @throws IllegalArgumentException if the directory or the file does not exist
 	 */
-	public static String validateFile(String filePath, String fileName) throws IllegalArgumentException{
+	public static String validateFile(String filePath, String fileName) throws IllegalArgumentException {
 		try {
 			if (!(new File(validateDirectory(filePath) + "/" + fileName).isFile())) {
 				throw new IllegalArgumentException("Invalid file (" + fileName + ")");
@@ -95,32 +107,40 @@ public final class InputValidation {
 
 	/**
 	 * Validates that the given string is a valid integer, and parses it.
-	 * 
-	 * <p><b>Critical Side Effect:</b> If validation fails, this method halts application execution via {@link #handleImproperUserInput()}.</p>
 	 *
-	 * @param numString the string to parse into an integer
-	 * @param variableName the name of the variable that the error message should display if validation fails
-	 * @return the parsed integer value
+	 * <p>
+	 * <b>Critical Side Effect:</b> If validation fails, this method halts
+	 * application execution via {@link #handleImproperUserInput(String)}.
+	 * </p>
+	 *
+	 * @param numString    the string to parse into an integer
+	 * @param variableName the name of the variable that the error message should
+	 *                     display if validation fails
+	 * @return The parsed integer value
 	 */
 	public static int validateInteger(String numString, String variableName) {
 		int num = -1;
 		try {
 			num = Integer.parseInt(numString);
-		}
-		catch (NumberFormatException e) {
+		} catch (NumberFormatException e) {
 			handleImproperUserInput("Invalid " + variableName + " (not a number)");
 		}
 		return num;
 	}
 
 	/**
-	 * Validates that the given string is a valid numerical binary flag (1 for true, 0 for false), and parses it.
-	 * 
-	 * <p><b>Critical Side Effect:</b> If validation fails, this method halts application execution via {@link #handleImproperUserInput()}.</p>
+	 * Validates that the given string is a valid numerical binary flag (1 for true,
+	 * 0 for false), and parses it.
 	 *
-	 * @param numString the string to parse into a boolean
-	 * @param variableName the name of the variable that the error message should display if validation fails
-	 * @return the parsed boolean value
+	 * <p>
+	 * <b>Critical Side Effect:</b> If validation fails, this method halts
+	 * application execution via {@link #handleImproperUserInput(String)}.
+	 * </p>
+	 *
+	 * @param bool         the string to parse into a boolean
+	 * @param variableName the name of the variable that the error message should
+	 *                     display if validation fails
+	 * @return The parsed boolean value
 	 */
 	public static Boolean validateNumericalBoolean(String bool, String variableName) {
 		try {
@@ -129,8 +149,7 @@ public final class InputValidation {
 				handleImproperUserInput("Invalid " + variableName + " (must be 1 or 0)");
 			}
 			return (tempTag == 1);
-		}
-		catch (NumberFormatException e) {
+		} catch (NumberFormatException e) {
 			handleImproperUserInput("Invalid " + variableName + " (not a number)");
 			return false;
 		}

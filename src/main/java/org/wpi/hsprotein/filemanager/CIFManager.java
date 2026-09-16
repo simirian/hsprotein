@@ -7,6 +7,10 @@ import java.io.IOException;
 import org.biojava.nbio.structure.io.CifFileReader;
 import org.biojava.nbio.structure.Structure;
 
+/**
+ * {@inheritDoc}
+ * Handles {@code .mmcif} and {@code .cif} files.
+ */
 class CIFManager implements ProteinManager {
 	String filepath = "";
 	CifFileReader cifReader = new CifFileReader();
