@@ -1,4 +1,4 @@
-package org.wpi.hsprotein.helpers;
+package edu.wpi.hsprotein.helpers;
 
 import java.io.File;
 import java.nio.file.Files;

@@ -1,4 +1,4 @@
-package org.wpi.hsprotein.filemanager;
+package edu.wpi.hsprotein.filemanager;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -20,7 +20,8 @@ class PDBManager implements ProteinManager {
 		this.filepath = filepath;
 	}
 
-	@Override public Structure getStructure() {
+	@Override
+	public Structure getStructure() {
 		try {
 			struct = pdbReader.getStructure(filepath);
 		} catch (IOException e) {
@@ -30,13 +31,14 @@ class PDBManager implements ProteinManager {
 		return struct;
 	}
 
-	@Override public void export(String outputDirectory) {
+	@Override
+	public void export(String outputDirectory) {
 		// Find filename that doesn't exist in outputDirectory
 		int num = 0;
 		String structName = struct.getName().equals("") ? "rotated_PDB_Protein" : struct.getName();
 		String filename = structName + ".pdb";
 		File file = new File(outputDirectory, filename);
-		while(file.exists()) {
+		while (file.exists()) {
 			filename = structName + (num++) + ".pdb";
 			file = new File(outputDirectory, filename);
 		}

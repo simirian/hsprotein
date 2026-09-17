@@ -1,6 +1,6 @@
-package org.wpi.hsprotein.filemanager;
+package edu.wpi.hsprotein.filemanager;
 
-import org.wpi.hsprotein.helpers.InputValidation;
+import edu.wpi.hsprotein.helpers.InputValidation;
 
 import org.biojava.nbio.structure.Structure;
 

@@ -1,4 +1,4 @@
 /**
  * Contains file input / output functionality.
  */
-package org.wpi.hsprotein.filemanager;
+package edu.wpi.hsprotein.filemanager;

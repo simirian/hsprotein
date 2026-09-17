@@ -3,7 +3,7 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>org.wpi.hsprotein</groupId>
+  <groupId>edu.wpi.hsprotein</groupId>
   <artifactId>hsprotein</artifactId>
   <version>1.0-SNAPSHOT</version>
 
@@ -62,7 +62,7 @@
         <artifactId>exec-maven-plugin</artifactId>
         <version>3.6.3</version>
         <configuration>
-          <mainClass>org.wpi.hsprotein.Main</mainClass> 
+          <mainClass>edu.wpi.hsprotein.Main</mainClass> 
         </configuration>
       </plugin>
       <plugin>
@@ -139,7 +139,7 @@
           <configuration>
             <archive>
               <manifest>
-                <mainClass>org.wpi.hsprotein.Main</mainClass>
+                <mainClass>edu.wpi.hsprotein.Main</mainClass>
               </manifest>
             </archive>
             <descriptorRefs>
