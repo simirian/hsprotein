@@ -28,7 +28,9 @@ class Main {
 
 
 		// Avoid missing "PDB Directory" system property warning
-		System.setProperty("PDB_DIR", pathToInputFileDirectory);
+		if (System.getProperty("PDB_DIR") == null) {
+			System.setProperty("PDB_DIR", pathToInputFileDirectory);
+		}
 
 
 		// Load input file into Protein File Manager

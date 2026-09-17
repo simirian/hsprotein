@@ -42,7 +42,7 @@ public final class InputValidation {
 	 * @return The verified directory path string
 	 */
 	public static String validateDirectory(String directoryPath, String errorMessage) {
-		if (!Files.exists(Paths.get(directoryPath)) || !Files.isDirectory(Paths.get(directoryPath))) {
+		if (!Files.isDirectory(Paths.get(directoryPath))) {
 			handleImproperUserInput(errorMessage);
 		}
 		return directoryPath;
@@ -56,7 +56,7 @@ public final class InputValidation {
 	 * @throws IllegalArgumentException if the directory does not exist
 	 */
 	public static String validateDirectory(String directoryPath) throws IllegalArgumentException {
-		if (!Files.exists(Paths.get(directoryPath)) || !Files.isDirectory(Paths.get(directoryPath))) {
+		if (!Files.isDirectory(Paths.get(directoryPath))) {
 			throw new IllegalArgumentException("Invalid directory path (" + directoryPath + ")");
 		}
 		return directoryPath;
