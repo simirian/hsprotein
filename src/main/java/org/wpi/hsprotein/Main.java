@@ -2,7 +2,6 @@ package org.wpi.hsprotein;
 import org.biojava.nbio.structure.Structure;
 import org.biojava.nbio.structure.gui.BiojavaJmol;
 import org.biojava.nbio.structure.io.CifFileReader;
-import org.wpi.hsprotein.filemanager.ProteinManager;
 import org.wpi.hsprotein.rotations.DihedralAngle;
 
 class Main {
@@ -12,15 +11,6 @@ class Main {
       return;
     }
     String filepath = args[0];
-
-    // Load input file into Protein File Manager
-    ProteinManager pManager = null;
-    try {
-      pManager = ProteinManager.load(filepath);
-    }
-    catch (Exception e) {
-      handleImproperUserInput("Invalid input file type");
-    }
 
     Structure s;
     try {
@@ -41,7 +31,7 @@ class Main {
 
     BiojavaJmol jmol = new BiojavaJmol();
     jmol.setStructure(s);
-    jmol.evalString("hide !" + args[1]);
+    jmol.evalString("hide !" + args[1] + "; color [x888888];");
     jmol.evalString("select *." + angle.a1() + " or *." + angle.a2() + "; color [x00ffff];");
     for (String atom : angle.rotations())
       jmol.evalString("select *." + atom + "; color [x44ff44];");
