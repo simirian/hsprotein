@@ -33,7 +33,7 @@ class Main {
 
     BiojavaJmol jmol = new BiojavaJmol();
     jmol.setStructure(s);
-    jmol.evalString("hide !" + args[1]);
+    jmol.evalString("hide !" + args[1] + "; color [x888888];");
     jmol.evalString("select *." + angle.a1() + " or *." + angle.a2() + "; color [x00ffff];");
     for (String atom : angle.rotations())
       jmol.evalString("select *." + atom + "; color [x44ff44];");
