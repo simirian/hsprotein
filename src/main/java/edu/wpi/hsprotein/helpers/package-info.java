@@ -1,4 +1,4 @@
 /**
  * Contains all helper / utility functions.
  */
-package org.wpi.hsprotein.helpers;
+package edu.wpi.hsprotein.helpers;

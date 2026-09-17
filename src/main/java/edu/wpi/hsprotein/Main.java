@@ -1,8 +1,8 @@
-package org.wpi.hsprotein;
+package edu.wpi.hsprotein;
 
-import org.wpi.hsprotein.filemanager.ProteinManager;
-import org.wpi.hsprotein.helpers.InputValidation; 
-import org.wpi.hsprotein.rotations.Rotator;
+import edu.wpi.hsprotein.filemanager.ProteinManager;
+import edu.wpi.hsprotein.helpers.InputValidation;
+import edu.wpi.hsprotein.rotations.Rotator;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -26,19 +26,16 @@ class Main {
 		// Check if only-dipeptide tag is a valid boolean (1 / 0)
 		Boolean dipeptideOnlyTag = InputValidation.validateNumericalBoolean(args[4], "dipeptideOnlyTag");
 
-
 		// Avoid missing "PDB Directory" system property warning
 		if (System.getProperty("PDB_DIR") == null) {
 			System.setProperty("PDB_DIR", pathToInputFileDirectory);
 		}
 
-
 		// Load input file into Protein File Manager
 		ProteinManager pManager = null;
 		try {
 			pManager = ProteinManager.load(filepath);
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			InputValidation.handleImproperUserInput("Invalid input file type");
 		}
 

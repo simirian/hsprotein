@@ -1,4 +1,4 @@
-package org.wpi.hsprotein;
+package edu.wpi.hsprotein;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 

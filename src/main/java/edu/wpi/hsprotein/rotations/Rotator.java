@@ -1,5 +1,5 @@
 // Get rotated idiot
-package org.wpi.hsprotein.rotations;
+package edu.wpi.hsprotein.rotations;
 
 import org.biojava.nbio.structure.Calc;
 import org.biojava.nbio.structure.Atom;
@@ -7,11 +7,12 @@ import org.biojava.nbio.structure.Group;
 import org.biojava.nbio.structure.align.util.RotationAxis;
 
 /**
- * A class containing all rotational operations. Will be greatly expanded in the future.
+ * A class containing all rotational operations. Will be greatly expanded in the
+ * future.
  */
 public class Rotator {
-	static String[][] hardCodedDihedralAtoms = {{"C1", "C2", "C3", "C4"}};
-	static String[][] rotatedAtoms = {{"C4"}};
+	static String[][] hardCodedDihedralAtoms = { { "C1", "C2", "C3", "C4" } };
+	static String[][] rotatedAtoms = { { "C4" } };
 
 	/**
 	 * Rotates a single residue 90°.
@@ -24,7 +25,7 @@ public class Rotator {
 			Atom atom2 = group.getAtom(dihedralAngleCarbons[2]);
 
 			RotationAxis dihedralAxis = new RotationAxis(Calc.subtract(atom1, atom2), atom2, 0);
-			dihedralAxis.rotate(new Atom[] {group.getAtom("C4")}, Math.toRadians(90));
+			dihedralAxis.rotate(new Atom[] { group.getAtom("C4") }, Math.toRadians(90));
 		}
 	}
 }

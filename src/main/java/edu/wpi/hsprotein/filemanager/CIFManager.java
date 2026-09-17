@@ -1,4 +1,4 @@
-package org.wpi.hsprotein.filemanager;
+package edu.wpi.hsprotein.filemanager;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -20,7 +20,8 @@ class CIFManager implements ProteinManager {
 		this.filepath = filepath;
 	}
 
-	@Override public Structure getStructure() {
+	@Override
+	public Structure getStructure() {
 		try {
 			struct = cifReader.getStructure(filepath);
 		} catch (IOException e) {
@@ -30,13 +31,14 @@ class CIFManager implements ProteinManager {
 		return struct;
 	}
 
-	@Override public void export(String outputDirectory) {
+	@Override
+	public void export(String outputDirectory) {
 		// Find filename that doesn't exist in outputDirectory
 		int num = 0;
 		String structName = struct.getName().equals("") ? "rotated_CIF_Protein" : struct.getName();
 		String filename = structName + ".cif";
 		File file = new File(outputDirectory, filename);
-		while(file.exists()) {
+		while (file.exists()) {
 			filename = structName + (num++) + ".cif";
 			file = new File(outputDirectory, filename);
 		}
