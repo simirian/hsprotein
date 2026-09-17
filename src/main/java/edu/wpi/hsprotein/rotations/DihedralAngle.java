@@ -1,4 +1,4 @@
-package org.wpi.hsprotein.rotations;
+package edu.wpi.hsprotein.rotations;
 
 final class Constants {
   public static final DihedralAngle[] alanine = new DihedralAngle[] {
