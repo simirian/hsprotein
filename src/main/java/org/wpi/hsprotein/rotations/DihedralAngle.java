@@ -270,13 +270,31 @@ final class Constants {
   };
 }
 
+/**
+ * Defines all dihedral angles of the 20 amino acids.
+ * Each record also contains the atoms that will be rotated around each of its dihedral angles,
+ * and the atoms with which these rotated atoms might clash (physically overlap) with.
+ * <p>All atoms are identified through their PDB Atom Names.</p>
+ *
+ * @param a1 the first atom that makes up the axis of the dihedral bond
+ * @param a2 the second atom that makes up the axis of the dihedral bond
+ * @param rotations the atoms that will be rotated around the dihedral axis
+ * @param mightClash the atoms that have just been rotated and could now be clashing with other atoms
+ * @param clashesWith the atoms that make up the backbone and anything that has already been rotated that the recently rotated atoms could now be clashing with
+ */
 public record DihedralAngle(
-    String a1,
-    String a2,
+    String a1, String a2,
     String[] rotations,
     String[] mightClash,
-    String[] clashesWith) {
+    String[] clashesWith
+	) {
 
+	/**
+	 * Get all dihedral angle information about a given amino acid based on its 3-letter code.
+	 *
+	 * @param residue the 3-letter code of the amino acid
+	 * @return a record of all dihedral angle information for the amino acid
+	 */
   public static DihedralAngle[] getDihedrals(String residue) {
     switch (residue.toLowerCase()) {
       case "ala":
