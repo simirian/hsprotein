@@ -1,0 +1,13 @@
+[project]
+name = "preprocessing"
+version = "0.1.0"
+description = "Fetch PDB files, remove duplicate atoms, and ignore non-protein components."
+readme = "README.md"
+authors = [
+    { name = "simirian", email = "simirian5813@gmail.com" },
+]
+dependencies = [
+ "biotite<1.7.1",
+ "hydride",
+]
+requires-python = ">=3.13"
