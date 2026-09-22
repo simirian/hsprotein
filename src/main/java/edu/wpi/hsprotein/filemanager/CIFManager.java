@@ -5,6 +5,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 import org.biojava.nbio.structure.io.CifFileReader;
+import org.biojava.nbio.structure.io.FileParsingParameters;
 import org.biojava.nbio.structure.Structure;
 
 /**
@@ -14,10 +15,13 @@ import org.biojava.nbio.structure.Structure;
 class CIFManager implements ProteinManager {
 	String filepath = "";
 	CifFileReader cifReader = new CifFileReader();
+	FileParsingParameters fpp = new FileParsingParameters();
 	Structure struct;
 
 	CIFManager(String filepath) {
 		this.filepath = filepath;
+		fpp.setCreateAtomBonds(true);
+		cifReader.setFileParsingParameters(fpp);
 	}
 
 	@Override

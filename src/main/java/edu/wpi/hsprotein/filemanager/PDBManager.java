@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
+import org.biojava.nbio.structure.io.FileParsingParameters;
 import org.biojava.nbio.structure.io.PDBFileReader;
 import org.biojava.nbio.structure.Structure;
 
@@ -14,10 +15,13 @@ import org.biojava.nbio.structure.Structure;
 class PDBManager implements ProteinManager {
 	String filepath = "";
 	PDBFileReader pdbReader = new PDBFileReader();
+	FileParsingParameters fpp = new FileParsingParameters();
 	Structure struct;
 
 	PDBManager(String filepath) {
 		this.filepath = filepath;
+		fpp.setCreateAtomBonds(true);
+		pdbReader.setFileParsingParameters(fpp);
 	}
 
 	@Override
