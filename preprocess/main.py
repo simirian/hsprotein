@@ -81,9 +81,11 @@ def cif_new_with(cif: CIFFile, structure: AtomArray | AtomArrayStack) -> CIFFile
             for model in cif.keys()  # noqa
         }
     )
-    for model in new.keys():  # noqa
-        new[model]["struct_asym"]["pdbx_modified"].as_array()[:] = "Y"
     set_structure(new, structure, extra_fields=["B_iso_or_equiv"])
+    for model in new.keys():  # noqa
+        if "struct_conn" in new[model]:
+            del new[model]["struct_conn"]
+        new[model]["struct_asym"]["pdbx_modified"].as_array()[:] = "Y"
     return new
 
 
