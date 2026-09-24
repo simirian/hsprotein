@@ -76,9 +76,13 @@ public final class CalcEnergy {
    */
   static double calculateEnergy(String atom, String[] clashes, Group residue, Chain chain) {
     Atom baseAtom = residue.getAtom(atom);
+    if (baseAtom == null)
+      return 0;
     double energy = 0.0;
     for (String clash : clashes) {
       Atom clashAtom = residue.getAtom(clash);
+      if (clashAtom == null)
+        continue;
       energy += getEnergy(baseAtom, clashAtom);
     }
     for (Group group : chain.getAtomGroups(GroupType.AMINOACID)) {
