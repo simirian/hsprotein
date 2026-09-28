@@ -44,7 +44,7 @@ public final class CalcEnergy {
     if (element == Element.C) {
       List<Bond> bonds = atom.getBonds();
       for (Bond bond : bonds)
-        if (bond.getAtomA().getElement() == Element.O || bond.getAtomA().getElement() == Element.O)
+        if (bond.getAtomA().getElement() == Element.O || bond.getAtomB().getElement() == Element.O)
           return 1.3;
       return 1.5;
     }
@@ -58,7 +58,7 @@ public final class CalcEnergy {
    * @return The energy of interaction.
    */
   static double getEnergy(Atom a1, Atom a2) {
-    double distance = Calc.getDistance(a1, a2);
+    double distance = Calc.getDistanceFast(a1, a2);
     double rsum = getRadius(a1) + getRadius(a2);
     rsum *= rsum;
     if (distance > rsum)
@@ -76,9 +76,11 @@ public final class CalcEnergy {
    */
   static double calculateEnergy(String atom, String[] clashes, Group residue, Chain chain) {
     Atom baseAtom = residue.getAtom(atom);
+    if (baseAtom == null) return 0;
     double energy = 0.0;
     for (String clash : clashes) {
       Atom clashAtom = residue.getAtom(clash);
+      if (clashAtom == null) continue;
       energy += getEnergy(baseAtom, clashAtom);
     }
     for (Group group : chain.getAtomGroups(GroupType.AMINOACID)) {
