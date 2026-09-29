@@ -2,7 +2,7 @@ package edu.wpi.hsprotein.rotations;
 
 final class Constants {
   public static final DihedralAngle[] alanine = new DihedralAngle[] {
-      new DihedralAngle("N", "CA", "CB", "H1",
+      new DihedralAngle("N", "CA", "CB", "HB1",
           new String[] { "HB1", "HB2", "HB3" },
           new String[] { "HB1", "HB2", "HB3" },
           new String[] { "N", "H", "C", "O", "HA" }),
