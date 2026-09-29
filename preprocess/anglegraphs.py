@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+from xml.dom import NO_DATA_ALLOWED_ERR
 import csv
 import os
 from argparse import ArgumentParser
@@ -8,6 +9,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 from biotite.structure import Atom, AtomArray, AtomArrayStack, dihedral, get_residues
 from biotite.structure.io import load_structure
+from matplotlib.axes import Axes
+from numpy.typing import NDArray
 
 missing: list[tuple[str, str, int, str]] = []
 
@@ -157,29 +160,13 @@ def add_structure_dihedrals(structure: AtomArray | AtomArrayStack, name: str):
             res_angles[i].append(angle)
 
 
-def main():
-    parser = ArgumentParser()
-    parser.add_argument(
-        "infile",
-        nargs=1,
-        type=str,
-        help="A file with a list of structure file names, or a directory containing structures.",
-    )
-    parser.add_argument(
-        "outdir",
-        nargs=1,
-        type=str,
-        help="A directory in which to place output information.",
-        default=".",
-    )
-    args = parser.parse_args()
-
+def process(args):
     for file in get_structure_file_list(args.infile[0]):
         basename = os.path.splitext(os.path.basename(file))[0]
         add_structure_dihedrals(load_structure(file), basename)
 
     with open(os.path.join(args.outdir[0], "missing.csv"), "w") as f:
-        writer = csv.writer(f)
+        writer = csv.writer(f, lineterminator="\n")
         writer.writerows(missing)
 
     for res, res_angles in angles.items():
@@ -190,19 +177,93 @@ def main():
         for i in range(longest):
             rows.append([x[i] if i < len(x) else None for x in res_angles])
         with open(os.path.join(args.outdir[0], res + ".csv"), "w") as f:
-            writer = csv.writer(f)
+            writer = csv.writer(f, lineterminator="\n")
             writer.writerows(rows)
 
-    x = (np.rad2deg(angles["phe"][0]) + 360) % 360
-    y = (np.rad2deg(angles["phe"][1]) + 360) % 360
 
+def read_res_data(indir: str, residue: str) -> NDArray:
+    if not os.path.isfile(os.path.join(indir, residue + ".csv")):
+        return np.array([])
+    with open(os.path.join(indir, residue + ".csv"), "r") as f:
+        reader = csv.reader(f)
+        data = np.array([row for row in reader])
+    data = data.astype(np.float64)
+    return data.transpose()
+
+
+def plot_heatmap(x: NDArray, y: NDArray) -> Axes:
+    plt.figure()
     ax = plt.subplot()
     z = np.histogram2d(y, x, 72, [(0, 360), (0, 360)])[0]
     ax.imshow(z)
     ax.set_xticks([x * 6 for x in range(12)], [x * 30 for x in range(12)])
     ax.set_yticks([x * 6 for x in range(12)], [x * 30 for x in range(12)])
-    plt.show()
+    ax.set_xlabel("X1")
+    ax.set_ylabel("X2")
+    return ax
 
+
+def plot_violin(data: NDArray) -> Axes:
+    plt.figure()
+    ax = plt.subplot()
+    ax.violinplot([data[x] for x in range(data.shape[0])])
+    ax.set_xticks(
+        [x + 1 for x in range(data.shape[0])],
+        ["X" + str(i + 1) for i in range(data.shape[0])],
+    )
+    return ax
+
+
+def plot(args):
+    for res, res_angles in angles.items():
+        if len(res_angles) == 0:
+            continue
+        data = np.array(res_angles) if len(res_angles[0]) > 0 else read_res_data(args.indir[0], res)
+        data = (np.rad2deg(data) + 360) % 360
+        if data.shape[0] == 2:
+            plot_heatmap(data[0], data[1])
+        else:
+            plot_violin(data)
+        plt.savefig(os.path.join(args.outdir[0], res + ".png"))
+
+
+def main():
+    parser = ArgumentParser()
+    subparsers = parser.add_subparsers(required=True)
+
+    process_parser = subparsers.add_parser("process", help="Get dihedral angles from a file.")
+    process_parser.set_defaults(func=process)
+    process_parser.add_argument(
+        "infile",
+        nargs=1,
+        type=str,
+        help="A file with a list of structure file names, or a directory containing structures.",
+    )
+    process_parser.add_argument(
+        "outdir",
+        nargs=1,
+        type=str,
+        help="A directory in which to place output information.",
+        default=".",
+    )
+
+    plot_parser = subparsers.add_parser("plot", help="Generate plots from dihedral data.")
+    plot_parser.set_defaults(func=plot)
+    plot_parser.add_argument(
+        "indir",
+        nargs=1,
+        type=str,
+        help="A directory which contains dihedral angle data as output by the `process` subcommand.",
+    )
+    plot_parser.add_argument(
+        "outdir",
+        nargs=1,
+        type=str,
+        help="A directory in which to place output information.",
+    )
+
+    args = parser.parse_args()
+    args.func(args)
 
 if __name__ == "__main__":
     main()
