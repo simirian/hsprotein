@@ -219,11 +219,13 @@ def plot(args):
             continue
         data = np.array(res_angles) if len(res_angles[0]) > 0 else read_res_data(args.indir[0], res)
         data = (np.rad2deg(data) + 360) % 360
-        if data.shape[0] == 2:
+        if data.shape[0] > 1:
             plot_heatmap(data[0], data[1])
-        else:
-            plot_violin(data)
+            plt.savefig(os.path.join(args.outdir[0], res + "01.png"))
+            plt.close()
+        plot_violin(data)
         plt.savefig(os.path.join(args.outdir[0], res + ".png"))
+        plt.close()
 
 
 def main():
