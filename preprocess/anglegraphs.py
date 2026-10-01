@@ -193,12 +193,12 @@ def read_res_data(indir: str, residue: str) -> NDArray:
 def plot_heatmap(x: NDArray, y: NDArray) -> Axes:
     plt.figure()
     ax = plt.subplot()
-    z = np.histogram2d(y, x, 72, [(0, 360), (0, 360)])[0]
-    ax.imshow(np.flip(z, 0))
+    z = np.flip(np.histogram2d(y, x, 72, [(0, 360), (0, 360)])[0], 0)
+    ax.imshow(z, "inferno_r", alpha=np.clip(z, 0, 1))
     ax.set_xticks([x * 6 for x in range(12)], [x * 30 for x in range(12)])
     ax.set_yticks([x * 6 + 5 for x in range(12)], [330 - x * 30 for x in range(12)])
-    ax.set_xlabel("X1")
-    ax.set_ylabel("X2")
+    ax.set_xlabel("Χ1")
+    ax.set_ylabel("Χ2")
     return ax
 
 
@@ -208,7 +208,7 @@ def plot_violin(data: NDArray) -> Axes:
     ax.violinplot([data[x] for x in range(data.shape[0])])
     ax.set_xticks(
         [x + 1 for x in range(data.shape[0])],
-        ["X" + str(i + 1) for i in range(data.shape[0])],
+        ["Χ" + str(i + 1) for i in range(data.shape[0])],
     )
     return ax
 
