@@ -194,9 +194,9 @@ def plot_heatmap(x: NDArray, y: NDArray) -> Axes:
     plt.figure()
     ax = plt.subplot()
     z = np.histogram2d(y, x, 72, [(0, 360), (0, 360)])[0]
-    ax.imshow(z)
+    ax.imshow(np.flip(z, 0))
     ax.set_xticks([x * 6 for x in range(12)], [x * 30 for x in range(12)])
-    ax.set_yticks([x * 6 for x in range(12)], [x * 30 for x in range(12)])
+    ax.set_yticks([x * 6 + 5 for x in range(12)], [330 - x * 30 for x in range(12)])
     ax.set_xlabel("X1")
     ax.set_ylabel("X2")
     return ax
