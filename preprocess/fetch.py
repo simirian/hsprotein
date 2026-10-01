@@ -4,7 +4,6 @@ import os
 import sys
 from argparse import ArgumentParser
 
-import numpy as np
 from biotite.database.rcsb import fetch
 from biotite.structure import AtomArray, AtomArrayStack, filter_amino_acids, stack
 from biotite.structure.io.pdbx import CIFBlock, CIFFile, get_structure, set_structure
@@ -106,6 +105,16 @@ def filter_aa(cif: CIFFile) -> CIFFile:
     return cif_new_with(cif, s)
 
 
+def del_h(s: AtomArray | AtomArrayStack) -> AtomArray | AtomArrayStack:
+    """Deletes hydrogen and deuterium from a structure."""
+    if isinstance(s, AtomArrayStack):
+        noh = s[:, ~(s.element == "H")]
+        return noh[:, ~(noh.element == "D")]
+    else:
+        noh = s[~(s.element == "H")]
+        return noh[~(noh.element == "D")]
+
+
 def add_h(structure: AtomArray | AtomArrayStack) -> AtomArray | AtomArrayStack:
     """Uses Hydride to add hydrogen atoms to a structure that doesn't have them."""
     if not isinstance(structure, AtomArrayStack):
@@ -119,22 +128,10 @@ def add_h(structure: AtomArray | AtomArrayStack) -> AtomArray | AtomArrayStack:
     return structure
 
 
-def convert_d_to_h(s: AtomArray | AtomArrayStack):
-    """Converts deuterium atoms to hydrogen."""
-    np.putmask(s.element, s.element == "D", "H")
-    prefix = np.strings.replace(np.strings.slice(s.atom_name, 1), "D", "H")
-    suffix = np.strings.slice(s.atom_name, 1, None)
-    np.put(s.atom_name, range(s.atom_name.shape[0]), np.strings.add(prefix, suffix))
-
-
 def fix_h(cif: CIFFile) -> CIFFile:
     """Fixes hydrogen atoms in the structure by adding them or converting D to H."""
     s = get_structure_data(cif)
-    if np.any(s.element == "D") or np.any(np.strings.startswith(s.atom_name, "D")):
-        convert_d_to_h(s)
-    if np.any(s.element == "H"):
-        return cif
-    return cif_new_with(cif, add_h(s))
+    return cif_new_with(cif, add_h(del_h(s)))
 
 
 def filter_chain(cif: CIFFile, chain_id: str) -> CIFFile:

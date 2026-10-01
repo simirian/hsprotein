@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-from xml.dom import NO_DATA_ALLOWED_ERR
 import csv
 import os
 from argparse import ArgumentParser
