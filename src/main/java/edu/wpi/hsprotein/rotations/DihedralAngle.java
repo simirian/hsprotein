@@ -2,51 +2,55 @@ package edu.wpi.hsprotein.rotations;
 
 final class Constants {
   public static final DihedralAngle[] alanine = new DihedralAngle[] {
-      new DihedralAngle("CA", "CB",
+      new DihedralAngle("N", "CA", "CB", "HB1",
           new String[] { "HB1", "HB2", "HB3" },
           new String[] { "HB1", "HB2", "HB3" },
           new String[] { "N", "H", "C", "O", "HA" }),
   };
 
   public static final DihedralAngle[] cysteine = new DihedralAngle[] {
-      new DihedralAngle("CA", "CB",
-          new String[] { "HB2", "HB3", "SG" },
+      new DihedralAngle("N", "CA", "CB", "SG",
+          new String[] { "HB2", "HB3", "SG", "HG" },
           new String[] { "HB2", "HB3", "SG" },
           new String[] { "N", "H", "C", "O", "HA" }),
+      new DihedralAngle("CA", "CB", "SG", "HG",
+          new String[] { "HG" },
+          new String[] { "HG" },
+          new String[] { "N", "H", "C", "O", "HA", "HB2", "HB3", "CA" })
   };
 
   public static final DihedralAngle[] asparticAcid = new DihedralAngle[] {
-      new DihedralAngle("CA", "CB",
+      new DihedralAngle("N", "CA", "CB", "CG",
           new String[] { "HB2", "HB3", "CG",  "OD1", "OD2" },
           new String[] { "HB2", "HB3", "CG" },
           new String[] { "N", "H", "C", "O", "HA" }),
-      new DihedralAngle("CB", "CG",
+      new DihedralAngle("CA", "CB", "CG", "OD1",
           new String[] { "OD1", "OD2" },
           new String[] { "OD1", "OD2" },
           new String[] { "N", "H", "C", "O", "HA", "HB2", "HB3", "CA" }),
   };
 
   public static final DihedralAngle[] glutamicAcid = new DihedralAngle[] {
-      new DihedralAngle("CA", "CB",
+      new DihedralAngle("N", "CA", "CB", "CG",
           new String[] { "HB2", "HB3", "CG", "CD", "OE1", "OE2", "HG2", "HG3", },
           new String[] { "HB2", "HB3", "CG" },
           new String[] { "N", "H", "C", "O", "HA" }),
-      new DihedralAngle("CB", "CG",
+      new DihedralAngle("CA", "CB", "CG", "CD",
           new String[] { "HG2", "HG3", "CD", "OE1", "OE2", },
           new String[] { "HG2", "HG3", "CD" },
           new String[] { "N", "H", "C", "O", "HA", "HB2", "HB3", "CA" }),
-      new DihedralAngle("CG", "CD",
+      new DihedralAngle("CB", "CG", "CD", "OE1",
           new String[] { "OE1", "OE2" },
           new String[] { "OE1", "OE2" },
           new String[] { "N", "H", "C", "O", "HA", "HB2", "HB3", "HG2", "HG3", "CB", "CA" }),
   };
 
   public static final DihedralAngle[] phenylalanine = new DihedralAngle[] {
-      new DihedralAngle("CA", "CB",
+      new DihedralAngle("N", "CA", "CB", "CG",
           new String[] { "CG", "CD1", "HD1", "CE1", "HE1", "CZ", "HZ", "CD2", "HD2", "CE2", "HE2", "HB2", "HB3" },
           new String[] { "HB2", "HB3", "CG" },
           new String[] { "N", "H", "C", "O", "HA" }),
-      new DihedralAngle("CB", "CG",
+      new DihedralAngle("CA", "CB", "CG", "CD1",
           new String[] { "HD1", "HE1", "HZ", "HD2", "HE2", "HZ", "CD1", "CE1", "CZ", "CD2", "CE2", "CZ" },
           new String[] { "HD1", "HE1", "HZ", "HD2", "HE2", "HZ", "CD1", "CE1", "CZ", "CD2", "CE2", "CZ" },
           new String[] { "N", "H", "C", "O", "HA", "HB2", "HB3", "CA" }),
@@ -55,30 +59,30 @@ final class Constants {
   public static final DihedralAngle[] glycine = new DihedralAngle[] {};
 
   public static final DihedralAngle[] histidine = new DihedralAngle[] {
-      new DihedralAngle("CA", "CB",
+      new DihedralAngle("N", "CA", "CB", "CG",
           new String[] { "CG", "ND1", "HD1", "CE1", "HE1", "CD2", "HD2", "NE2", "HB2", "HB3" },
           new String[] { "HB2", "HB3", "CG" },
           new String[] { "N", "H", "C", "O", "HA" }),
-      new DihedralAngle("CB", "CG",
+      new DihedralAngle("CA", "CB", "CG", "ND1",
           new String[] { "ND1", "HD1", "HE1", "HD2", "NE2", "CE1", "CD2" },
           new String[] { "ND1", "HD1", "HE1", "HD2", "NE2", "CE1", "CD2" },
           new String[] { "N", "H", "C", "O", "HA", "HB2", "HB3", "CA" }),
   };
 
   public static final DihedralAngle[] isoleucine = new DihedralAngle[] {
-      new DihedralAngle("CA", "CB",
+      new DihedralAngle("N", "CA", "CB", "CG1",
           new String[] { "HB", "CG1", "CD1", "HD11", "HD12", "HD13", "HG12", "HG13", "CG2", "HG21", "HG22", "HG23" },
           new String[] { "HB", "CG1", "CG2" },
           new String[] { "N", "H", "C", "O", "HA" }),
-      new DihedralAngle("CB", "CG1",
+      new DihedralAngle("CA", "CB", "CG1", "CD1",
           new String[] { "CD1", "HD11", "HD12", "HD13", "HG12", "HG13" },
           new String[] { "HG12", "HG13", "CD1" },
           new String[] { "N", "H", "C", "O", "HA", "HB", "CG2", "CA" }),
-      new DihedralAngle("CG1", "CD1",
+      new DihedralAngle("CB", "CG1", "CD1", "HD11",
           new String[] { "HD11", "HD12", "HD13" },
           new String[] { "HD11", "HD12", "HD13" },
           new String[] { "N", "H", "C", "O", "HA", "HB", "HG12", "HG13", "CA", "CG2", "CB" }),
-      new DihedralAngle("CB", "CG2",
+      new DihedralAngle("CA", "CB", "CG2", "HG21",
           new String[] { "HG21", "HG22", "HG23" },
           new String[] { "HG21", "HG22", "HG23" },
           new String[] { "N", "H", "C", "O", "HA", "HB", "HG12", "HG13", "HD11", "HD12", "HD13", "CD1", "CA", "CB",
@@ -86,25 +90,25 @@ final class Constants {
   };
 
   public static final DihedralAngle[] lysine = new DihedralAngle[] {
-      new DihedralAngle("CA", "CB",
+      new DihedralAngle("N", "CA", "CB", "CG",
           new String[] { "CG", "CD", "CE", "NZ", "HZ1", "HZ2", "HZ3", "HE2", "HE3", "HD2", "HE3", "HD2", "HD3", "HG2",
               "HG3", "HB2", "HB3" },
           new String[] { "HB2", "HB3", "CG" },
           new String[] { "N", "H", "C", "O", "HA" }),
-      new DihedralAngle("CB", "CG",
+      new DihedralAngle("CA", "CB", "CG", "CD",
           new String[] { "NZ", "HZ1", "HZ2", "HZ3", "HE2", "HE3", "HD2", "HE3", "HD2", "HD3", "HG2", "HG3", "CD",
               "CE" },
           new String[] { "CD", "HG2", "HG3" },
           new String[] { "N", "H", "C", "O", "HA", "HB2", "HB3", "CA" }),
-      new DihedralAngle("CG", "CD",
+      new DihedralAngle("CB", "CG", "CD", "CE",
           new String[] { "NZ", "HZ1", "HZ2", "HZ3", "HE2", "HE3", "HD2", "HE3", "HD2", "HD3", "CE" },
           new String[] { "HD2", "HD3", "CE" },
           new String[] { "N", "H", "C", "O", "HA", "HB2", "HB3", "HG2", "HG3", "CA", "CB" }),
-      new DihedralAngle("CD", "CE",
+      new DihedralAngle("CG", "CD", "CE", "NZ",
           new String[] { "NZ", "HZ1", "HZ2", "HZ3", "HE2", "HE3" },
           new String[] { "HE2", "HE3", "NZ" },
           new String[] { "N", "H", "C", "O", "HA", "HB2", "HB3", "HG2", "HG3", "HD2", "HD3", "CA", "CB", "CG" }),
-      new DihedralAngle("CE", "NZ",
+      new DihedralAngle("CD", "CE", "NZ", "HZ1",
           new String[] { "HZ1", "HZ2", "HZ3" },
           new String[] { "HZ1", "HZ2", "HZ3" },
           new String[] { "N", "H", "C", "O", "HA", "HB2", "HB3", "HG2", "HG3", "HD2", "HD3", "HE2", "HE3", "CA",
@@ -112,49 +116,49 @@ final class Constants {
   };
 
   public static final DihedralAngle[] leucine = new DihedralAngle[] {
-      new DihedralAngle("CA", "CB",
+      new DihedralAngle("N", "CA", "CB", "CG",
           new String[] { "CG", "HG", "CD1", "HD11", "HD12", "HD13", "CD2", "HD21", "HD22", "HD23", "HB2", "HB3" },
           new String[] { "CG", "HB2", "HB3" },
           new String[] { "N", "H", "C", "O", "HA" }),
-      new DihedralAngle("CB", "CG",
+      new DihedralAngle("CA", "CB", "CG", "CD1",
           new String[] { "HG", "CD1", "HD11", "HD12", "HD13", "CD2", "HD21", "HD22", "HD23" },
           new String[] { "HG", "CD1", "CD2" },
           new String[] { "N", "H", "C", "O", "HA", "HB2", "HB3", "CA" }),
-      new DihedralAngle("CG", "CD1",
+      new DihedralAngle("CB", "CG", "CD1", "HD11",
           new String[] { "HD11", "HD12", "HD13" },
           new String[] { "HD11", "HD12", "HD13" },
           new String[] { "N", "H", "C", "O", "HA", "HB2", "HB3", "HG", "CD2", "CA", "CB" }),
-      new DihedralAngle("CG", "CD2",
+      new DihedralAngle("CB", "CG", "CD2", "HD21",
           new String[] { "HD21", "HD22", "HD23" },
           new String[] { "HD21", "HD22", "HD23" },
           new String[] { "N", "H", "C", "O", "HA", "HB2", "HB3", "HG", "HD11", "HD12", "HD13", "CA", "CB", "CD1" }),
   };
 
   public static final DihedralAngle[] methionine = new DihedralAngle[] {
-      new DihedralAngle("CA", "CB",
+      new DihedralAngle("N", "CA", "CB", "CG",
           new String[] { "CG", "SD", "CE", "HE1", "HE2", "HE3", "HG2", "HG3", "HB2", "HB3" },
           new String[] { "HB2", "HB3", "CG" },
           new String[] { "N", "H", "C", "O", "HA" }),
-      new DihedralAngle("CB", "CG",
+      new DihedralAngle("CA", "CB", "CG", "SD",
           new String[] { "SD", "CE", "HE1", "HE2", "HE3", "HG2", "HG3" },
           new String[] { "SD", "HG2", "HG3" },
           new String[] { "N", "H", "C", "O", "HA", "HB2", "HB3", "CA" }),
-      new DihedralAngle("CG", "SD",
+      new DihedralAngle("CB", "CG", "SD", "CE",
           new String[] { "CE", "HE1", "HE2", "HE3" },
           new String[] { "CE" },
           new String[] { "N", "H", "C", "O", "HA", "HB2", "HB3", "HG2", "HG3", "CA", "CB" }),
-      new DihedralAngle("SD", "CE",
+      new DihedralAngle("CG", "SD", "CE", "HE1",
           new String[] { "HE1", "HE2", "HE3" },
           new String[] { "HE1", "HE2", "HE3" },
           new String[] { "N", "H", "C", "O", "HA", "HB2", "HB3", "HG2", "HG3", "CA", "CB", "CG" }),
   };
 
   public static final DihedralAngle[] asparagine = new DihedralAngle[] {
-      new DihedralAngle("CA", "CB",
+      new DihedralAngle("N", "CA", "CB", "CG",
           new String[] { "CG", "OD1", "ND2", "HD21", "HD22", "HB2", "HB3" },
           new String[] { "CG", "HB2", "HB3" },
           new String[] { "N", "H", "C", "O", "HA" }),
-      new DihedralAngle("CB", "CG",
+      new DihedralAngle("CA", "CB", "CG", "OD1",
           new String[] { "OD1", "ND2", "HD21", "HD22" },
           new String[] { "OD1", "ND2", "HD21", "HD22" },
           new String[] { "N", "H", "C", "O", "HA", "HB2", "HB3", "CA" }),
@@ -163,89 +167,89 @@ final class Constants {
   public static final DihedralAngle[] proline = new DihedralAngle[] {};
 
   public static final DihedralAngle[] glutamine = new DihedralAngle[] {
-      new DihedralAngle("CA", "CB",
+      new DihedralAngle("N", "CA", "CB", "CG",
           new String[] { "CD", "CE", "OE1", "NE2", "HE21", "HE22", "HG2", "HG3", "HB2", "HB3" },
           new String[] { "HB2", "HB3", "CG" },
           new String[] { "N", "H", "C", "O", "HA" }),
-      new DihedralAngle("CB", "CG",
+      new DihedralAngle("CA", "CB", "CG", "CD",
           new String[] { "CD", "OE1", "NE2", "HE21", "HE22", "HG2", "HG3" },
           new String[] { "HG2", "HG3", "CD" },
           new String[] { "N", "H", "C", "O", "HA", "HB2", "HB3", "CA" }),
-      new DihedralAngle("CG", "CD",
+      new DihedralAngle("CB", "CG", "CD", "OE1",
           new String[] { "OE1", "NE2", "HE21", "HE22" },
           new String[] { "OE1", "NE2", "HE21", "HE22" },
           new String[] { "N", "H", "C", "O", "HA", "HB2", "HB3", "HG2", "HG3", "CA", "CB" }),
   };
 
   public static final DihedralAngle[] arginine = new DihedralAngle[] {
-      new DihedralAngle("CA", "CB",
+      new DihedralAngle("N", "CA", "CB", "CG",
           new String[] { "CG", "CD", "NE", "CZ", "NH1", "HH11", "HH12", "NH2", "HH21", "HH22", "HE", "HD2", "HD3",
               "HG2", "HG3", "HB2", "HB3" },
           new String[] { "HB2", "HB3", "CG" },
           new String[] { "N", "H", "C", "O", "HA" }),
-      new DihedralAngle("CB", "CG",
+      new DihedralAngle("CA", "CB", "CG", "CD",
           new String[] { "CD", "NE", "CZ", "NH1", "HH11", "HH12", "NH2", "HH21", "HH22", "HE", "HD2", "HD3", "HG2",
               "HG3" },
           new String[] { "HG2", "HG3", "CD" },
           new String[] { "N", "H", "C", "O", "HA", "HB2", "HB3", "CA" }),
-      new DihedralAngle("CG", "CD",
+      new DihedralAngle("CB", "CG", "CD", "NE",
           new String[] { "NE", "CZ", "NH1", "HH11", "HH12", "NH2", "HH21", "HH22", "HE", "HD2", "HD3" },
           new String[] { "HD2", "HD3", "NE" },
           new String[] { "N", "H", "C", "O", "HA", "HB2", "HB3", "HG2", "HG3", "CA", "CB" }),
-      new DihedralAngle("CD", "NE",
+      new DihedralAngle("CG", "CD", "NE", "CZ",
           new String[] { "HH11", "HH12", "HH21", "HH22", "HE", "NH1", "NH2", "CZ" },
           new String[] { "HH11", "HH12", "HH21", "HH22", "HE", "NH1", "NH2", "CZ" },
           new String[] { "N", "H", "C", "O", "HA", "HB2", "HB3", "HG2", "HG3", "HD2", "HD3", "CA", "CB", "CG" }),
   };
 
   public static final DihedralAngle[] serine = new DihedralAngle[] {
-      new DihedralAngle("CA", "CB",
+      new DihedralAngle("N", "CA", "CB", "OG",
           new String[] { "OG", "HG", "HB2", "HB3" },
           new String[] { "OG", "HB2", "HB3" },
           new String[] { "N", "H", "C", "O", "HA" }),
-      new DihedralAngle("CB", "OG",
+      new DihedralAngle("CA", "CB", "OG", "HG",
           new String[] { "HG" },
           new String[] { "HG" },
           new String[] { "N", "H", "C", "O", "HA", "CA", "HB2", "HB3" }),
   };
 
   public static final DihedralAngle[] threonine = new DihedralAngle[] {
-      new DihedralAngle("CA", "CB",
+      new DihedralAngle("N", "CA", "CB", "OG1",
           new String[] { "HB", "OG1", "HG1", "CG2", "HG21", "HG22", "HG23" },
           new String[] { "HB", "OG1", "CG2" },
           new String[] { "N", "H", "C", "O", "HA" }),
-      new DihedralAngle("CB", "OG1",
+      new DihedralAngle("CA", "CB", "OG1", "HG1",
           new String[] { "HG1" },
           new String[] { "HG1" },
           new String[] { "N", "H", "C", "O", "HA", "HB", "CA", "CG2" }),
-      new DihedralAngle("CB", "CG2",
+      new DihedralAngle("CA", "CB", "CG2", "HG21",
           new String[] { "HG21", "HG22", "HG23" },
           new String[] { "HG21", "HG22", "HG23" },
           new String[] { "N", "H", "C", "O", "HA", "HB", "OG1", "HG1", "CA" }),
   };
 
   public static final DihedralAngle[] valine = new DihedralAngle[] {
-      new DihedralAngle("CA", "CB",
+      new DihedralAngle("N", "CA", "CB", "CG1",
           new String[] { "HB", "CG1", "HG11", "HG12", "HG13", "CG2", "HG21", "HG22", "HG23" },
           new String[] { "HB", "CG1", "CG2" },
           new String[] { "N", "H", "C", "O", "HA" }),
-      new DihedralAngle("CB", "CG1",
+      new DihedralAngle("CA", "CB", "CG1", "HG11",
           new String[] { "HG11", "HG12", "HG13" },
           new String[] { "HG11", "HG12", "HG13" },
           new String[] { "N", "H", "C", "O", "HA", "HB", "CA", "CG2" }),
-      new DihedralAngle("CB", "CG2",
+      new DihedralAngle("CA", "CB", "CG2", "HG21",
           new String[] { "HG21", "HG22", "HG23" },
           new String[] { "HG21", "HG22", "HG23" },
           new String[] { "N", "H", "C", "O", "HA", "HB", "HG11", "HG12", "HG13", "CA", "CG1" }),
   };
 
   public static final DihedralAngle[] tryptophan = new DihedralAngle[] {
-      new DihedralAngle("CA", "CB",
+      new DihedralAngle("N", "CA", "CB", "CG",
           new String[] { "CG", "CD1", "HD1", "NE1", "HE1", "CD2", "CE2", "CZ2", "HZ2", "CH2", "HH2", "CE3", "HE3",
               "CZ3", "HZ3", "HB2", "HB3" },
           new String[] { "HB2", "HB3", "CG" },
           new String[] { "N", "H", "C", "O", "HA" }),
-      new DihedralAngle("CB", "CG",
+      new DihedralAngle("CA", "CB", "CG", "CD1",
           new String[] { "CD1", "HD1", "NE1", "HE1", "CD2", "CE2", "CZ2", "HZ2", "CH2", "HH2", "CE3", "HE3", "CZ3",
               "HZ3" },
           new String[] { "HD1", "HE1", "HZ2", "HH2", "HE3", "HZ3", "CD1", "CD2", "NE1", "CE2", "CZ2", "CH2", "CE3",
@@ -254,15 +258,15 @@ final class Constants {
   };
 
   public static final DihedralAngle[] tyrosine = new DihedralAngle[] {
-      new DihedralAngle("CA", "CB",
+      new DihedralAngle("N", "CA", "CB", "CG",
           new String[] { "CG", "CD1", "HD1", "CE1", "HE1", "CZ", "OH", "HH", "CD2", "HD2", "CE2", "HE2", "HB2", "HB3" },
           new String[] { "HB2", "HB3", "CG" },
           new String[] { "N", "H", "C", "O", "HA" }),
-      new DihedralAngle("CB", "CG",
+      new DihedralAngle("CA", "CB", "CG", "CD1",
           new String[] { "CD1", "HD1", "CE1", "HE1", "CZ", "OH", "HH", "CD2", "HD2", "CE2", "HE2" },
           new String[] { "HD1", "HE1", "OH", "HD2", "HE2", "CD1", "CD2", "CE1", "CE2", "CZ" },
           new String[] { "N", "H", "C", "O", "HA", "HB2", "HB3", "CA" }),
-      new DihedralAngle("CZ", "OH",
+      new DihedralAngle("CE1", "CZ", "OH", "HH",
           new String[] { "HH" },
           new String[] { "HH" },
           new String[] { "N", "H", "C", "O", "HA", "HB2", "HB3", "HD1", "HE1", "HD2", "HE2", "CA", "CB", "CG", "CD1",
@@ -276,14 +280,16 @@ final class Constants {
  * and the atoms with which these rotated atoms might clash (physically overlap) with.
  * <p>All atoms are identified through their PDB Atom Names.</p>
  *
- * @param a1 the first atom that makes up the axis of the dihedral bond
- * @param a2 the second atom that makes up the axis of the dihedral bond
+ * @param a1 the first rotatable atom on the dihedral bond
+ * @param a2 the first atom which defines the dihedral axis
+ * @param a3 the second atom which defines the dihedral axis
+ * @param a4 the second rotatable atom on the dihedral bond
  * @param rotations the atoms that will be rotated around the dihedral axis
  * @param mightClash the atoms that have just been rotated and could now be clashing with other atoms
  * @param clashesWith the atoms that make up the backbone and anything that has already been rotated that the recently rotated atoms could now be clashing with
  */
 public record DihedralAngle(
-    String a1, String a2,
+    String a1, String a2, String a3, String a4,
     String[] rotations,
     String[] mightClash,
     String[] clashesWith
