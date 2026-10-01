@@ -23,7 +23,6 @@ dihedrals: dict[str, list[tuple[str, str, str, str]]] = {
         ("CB", "CG", "CD", "OE1"),
     ],
     "phe": [("N", "CA", "CB", "CG"), ("CA", "CB", "CG", "CD1")],
-    "gly": [],
     "his": [("N", "CA", "CB", "CG"), ("CA", "CB", "CG", "ND1")],
     "ile": [
         ("N", "CA", "CB", "CG1"),
@@ -51,7 +50,6 @@ dihedrals: dict[str, list[tuple[str, str, str, str]]] = {
         ("CG", "SD", "CE", "HE1"),
     ],
     "asn": [("N", "CA", "CB", "CG"), ("CA", "CB", "CG", "OD1")],
-    "pro": [],
     "gln": [
         ("N", "CA", "CB", "CG"),
         ("CA", "CB", "CG", "CD"),
@@ -85,27 +83,25 @@ dihedrals: dict[str, list[tuple[str, str, str, str]]] = {
     ],
 }
 
-angles: dict[str, list[list[float]]] = {
-    "ala": [[]],
-    "cys": [[], []],
-    "asp": [[], []],
-    "glu": [[], [], []],
-    "phe": [[], []],
-    "gly": [],
-    "his": [[], []],
-    "ile": [[], [], [], []],
-    "lys": [[], [], [], [], []],
-    "leu": [[], [], [], []],
-    "met": [[], [], [], []],
-    "asn": [[], []],
-    "pro": [],
-    "gln": [[], [], []],
-    "arg": [[], [], [], []],
-    "ser": [[], []],
-    "thr": [[], [], []],
-    "val": [[], [], []],
-    "trp": [[], []],
-    "tyr": [[], [], []],
+angles: dict[str, list[tuple[str, int, float, list[float]]]] = {
+    "ala": [],
+    "cys": [],
+    "asp": [],
+    "glu": [],
+    "phe": [],
+    "his": [],
+    "ile": [],
+    "lys": [],
+    "leu": [],
+    "met": [],
+    "asn": [],
+    "gln": [],
+    "arg": [],
+    "ser": [],
+    "thr": [],
+    "val": [],
+    "trp": [],
+    "tyr": [],
 }
 
 
@@ -153,10 +149,12 @@ def add_structure_dihedrals(structure: AtomArray | AtomArrayStack, name: str):
             continue
         res_dihedrals = dihedrals[res_name]
         res_angles = angles[res_name]
+        a = []
         for i in range(len(res_dihedrals)):
             atoms = get_dihedral_atoms(structure, res_id, name, res_dihedrals[i])
             angle = dihedral(*atoms)[0] if atoms else np.nan
-            res_angles[i].append(angle)
+            a.append(angle)
+        res_angles.append((name, res_id, 0, a))
 
 
 def process(args):
@@ -171,13 +169,10 @@ def process(args):
     for res, res_angles in angles.items():
         if len(res_angles) == 0:
             continue
-        longest = max([len(x) for x in res_angles])
-        rows = []
-        for i in range(longest):
-            rows.append([x[i] if i < len(x) else None for x in res_angles])
         with open(os.path.join(args.outdir[0], res + ".csv"), "w") as f:
             writer = csv.writer(f, lineterminator="\n")
-            writer.writerows(rows)
+            for angle in res_angles:
+                writer.writerow([angle[0], angle[1], angle[2], *angle[3]])
 
 
 def read_res_data(indir: str, residue: str) -> NDArray:
@@ -185,9 +180,10 @@ def read_res_data(indir: str, residue: str) -> NDArray:
         return np.array([])
     with open(os.path.join(indir, residue + ".csv"), "r") as f:
         reader = csv.reader(f)
-        data = np.array([row for row in reader])
-    data = data.astype(np.float64)
-    return data.transpose()
+        data = []
+        for row in reader:
+            data.append(row[3:])
+    return np.array(data).astype(np.float64)
 
 
 def plot_heatmap(x: NDArray, y: NDArray) -> Axes:
@@ -215,10 +211,11 @@ def plot_violin(data: NDArray) -> Axes:
 
 def plot(args):
     for res, res_angles in angles.items():
-        if len(res_angles) == 0:
-            continue
-        data = np.array(res_angles) if len(res_angles[0]) > 0 else read_res_data(args.indir[0], res)
-        data = (np.rad2deg(data) + 360) % 360
+        if len(res_angles) > 0:
+            data = np.array([angle[3] for angle in res_angles])
+        else:
+            data = read_res_data(args.indir[0], res)
+        data = (np.rad2deg(data.transpose()) + 360) % 360
         if data.shape[0] > 1:
             plot_heatmap(data[0], data[1])
             plt.savefig(os.path.join(args.outdir[0], res + "01.png"))
@@ -232,7 +229,9 @@ def main():
     parser = ArgumentParser()
     subparsers = parser.add_subparsers(required=True)
 
-    process_parser = subparsers.add_parser("process", help="Get dihedral angles from a file.")
+    process_parser = subparsers.add_parser(
+        "process", help="Get dihedral angles from a file."
+    )
     process_parser.set_defaults(func=process)
     process_parser.add_argument(
         "infile",
@@ -248,7 +247,9 @@ def main():
         default=".",
     )
 
-    plot_parser = subparsers.add_parser("plot", help="Generate plots from dihedral data.")
+    plot_parser = subparsers.add_parser(
+        "plot", help="Generate plots from dihedral data."
+    )
     plot_parser.set_defaults(func=plot)
     plot_parser.add_argument(
         "indir",
@@ -265,6 +266,7 @@ def main():
 
     args = parser.parse_args()
     args.func(args)
+
 
 if __name__ == "__main__":
     main()
