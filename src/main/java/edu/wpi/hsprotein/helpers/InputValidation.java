@@ -9,8 +9,7 @@ import java.nio.file.Paths;
  * file existence.
  */
 public final class InputValidation {
-	private InputValidation() {
-	}
+	private InputValidation() {}
 
 	/**
 	 * Alerts the user of improper command line arguments in a consistent, formatted

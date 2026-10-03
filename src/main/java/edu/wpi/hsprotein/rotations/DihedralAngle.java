@@ -365,8 +365,8 @@ public record DihedralAngle(
     plane.setY(plane.getY() * abc.getY());
     plane.setZ(plane.getZ() * abc.getZ());
     if (plane.getX() + plane.getY() + plane.getZ() < 0)
-      return 360 - angle;
-    else
       return angle;
+    else
+      return 360 - angle;
   }
 }
