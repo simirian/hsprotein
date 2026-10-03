@@ -50,6 +50,6 @@ class Main {
 		}
 
 		// Output rotated file
-		pManager.export(pathToOutputFileDirectory);
+		pManager.export(aminoAcid.getPDBName() + residueID);
 	}
 }

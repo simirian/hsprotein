@@ -9,17 +9,20 @@ import org.biojava.nbio.structure.io.FileParsingParameters;
 import org.biojava.nbio.structure.Structure;
 
 /**
- * {@inheritDoc}
+ * Public interface that handles file loading, structuring, and outputting independent of file type.
+ * All file-type-specific actions are handled by package-private implementing classes.
  * Handles {@code .mmcif} and {@code .cif} files.
  */
 class CIFManager implements ProteinManager {
-	String filepath = "";
+	String input_filepath = "";
+	String output_directory = "";
 	CifFileReader cifReader = new CifFileReader();
 	FileParsingParameters fpp = new FileParsingParameters();
 	Structure struct;
 
-	CIFManager(String filepath) {
-		this.filepath = filepath;
+	CIFManager(String input_filepath, String output_directory) {
+		this.input_filepath = input_filepath;
+		this.output_directory = output_directory;
 		fpp.setCreateAtomBonds(true);
 		cifReader.setFileParsingParameters(fpp);
 	}
@@ -27,7 +30,7 @@ class CIFManager implements ProteinManager {
 	@Override
 	public Structure getStructure() {
 		try {
-			struct = cifReader.getStructure(filepath);
+			struct = cifReader.getStructure(input_filepath);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -36,15 +39,15 @@ class CIFManager implements ProteinManager {
 	}
 
 	@Override
-	public void export(String outputDirectory) {
+	public void export(String residueName) {
 		// Find filename that doesn't exist in outputDirectory
-		int num = 0;
-		String structName = "rotated_" + (struct.getName().equals("") ? "CIF_Protein" : struct.getName()) + "_";
+		int num = 1;
+		String structName = "rotated_" + (residueName != "" ? residueName : (struct.getName().equals("") ? "CIF_Protein" : struct.getName()));
 		String filename = structName + ".cif";
-		File file = new File(outputDirectory, filename);
+		File file = new File(output_directory, filename);
 		while (file.exists()) {
-			filename = structName + (num++) + ".cif";
-			file = new File(outputDirectory, filename);
+			filename = structName + "_" + (num++) + ".cif";
+			file = new File(output_directory, filename);
 		}
 
 		// Write to CIF file
