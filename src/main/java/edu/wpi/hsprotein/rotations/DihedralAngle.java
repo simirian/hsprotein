@@ -51,8 +51,8 @@ final class Constants {
           new String[] { "HB2", "HB3", "CG" },
           new String[] { "N", "H", "C", "O", "HA" }),
       new DihedralAngle("CA", "CB", "CG", "CD1",
-          new String[] { "HD1", "HE1", "HZ", "HD2", "HE2", "HZ", "CD1", "CE1", "CZ", "CD2", "CE2", "CZ" },
-          new String[] { "HD1", "HE1", "HZ", "HD2", "HE2", "HZ", "CD1", "CE1", "CZ", "CD2", "CE2", "CZ" },
+          new String[] { "HD1", "HE1", "HZ", "HD2", "HE2", "CD1", "CE1", "CZ", "CD2", "CE2" },
+          new String[] { "HD1", "HE1", "HZ", "HD2", "HE2", "CD1", "CE1", "CZ", "CD2", "CE2" },
           new String[] { "N", "H", "C", "O", "HA", "HB2", "HB3", "CA" }),
   };
 
