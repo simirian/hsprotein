@@ -1,6 +1,7 @@
 // Get rotated idiot
 package edu.wpi.hsprotein.rotations;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -45,9 +46,8 @@ public class Rotator {
 		if (saveEnergy) {
 			if (dihAngles.length > 5) {
 				System.out.println("Cannot save all energy outputs for each dihedral angle due to storage capacity issues.");
-			}
-			else {
-				allEnergy = new double[(int) Math.pow(360/5, dihAngles.length)];
+			} else {
+				allEnergy = new double[(int) Math.pow(360 / 5, dihAngles.length)];
 			}
 		}
 	}
@@ -56,7 +56,7 @@ public class Rotator {
 	 * Calculates the current output of the amino acid from its "true zero" position and resets it to that value.
 	 */
 	private void zeroOutAminoAcid() {
-		for (int i=0; i < dihAngles.length; i++) {
+		for (int i = 0; i < dihAngles.length; i++) {
 			Atom atom1 = group.getAtom(dihAngles[i].a1());
 			Atom atom2 = group.getAtom(dihAngles[i].a2());
 			Atom atom3 = group.getAtom(dihAngles[i].a3());
@@ -78,10 +78,11 @@ public class Rotator {
 	 */
 	public void rotateSingleResidue(int[] angles) throws IllegalArgumentException {
 		if (dihAngles.length != angles.length) {
-			throw new IllegalArgumentException("There are " + dihAngles.length + " dihedral angles, but only " + angles.length + " rotational angles were provided");
+			throw new IllegalArgumentException("There are " + dihAngles.length + " dihedral angles, but only " + angles.length
+					+ " rotational angles were provided");
 		}
 
-		for (int i=0; i < angles.length; i++) {
+		for (int i = 0; i < angles.length; i++) {
 			Atom atom1 = group.getAtom(dihAngles[i].a2());
 			Atom atom2 = group.getAtom(dihAngles[i].a3());
 			RotationAxis dihedralAxis = new RotationAxis(Calc.subtract(atom1, atom2), atom2, 0);
@@ -109,48 +110,33 @@ public class Rotator {
 		// Define all atoms
 		Atom[] rotatingAtoms = Arrays.stream(dihAngles[currentIndex].rotations()).map(a -> group.getAtom(a)).toArray(Atom[]::new);
 
-		for (int i = 0; i < 360; i+=5) {
+		for (int i = 0; i < 360; i += 5) {
 			// Rotate all connected atoms
-			if (i != 0) dihedralAxis.rotate(rotatingAtoms, Math.toRadians(5));
+			if (i != 0)
+				dihedralAxis.rotate(rotatingAtoms, Math.toRadians(5));
 
 			// Calculate energy of the current dihedral angle
-			double totalEnergy = 0;
-			for (DihedralAngle dih : dihAngles) {
-				for (String cwAtom : dih.mightClash()) {
-					totalEnergy += CalcEnergy.calculateEnergy(cwAtom, dih.clashesWith(), group, chain);
-				}
-			}
-			// System.out.println("X" + (currentIndex + 1) + " - " + i + "° = " + totalEnergy);
-			totalEnergy += currentEnergy;
+			double totalEnergy = currentEnergy;
+			for (String clashAtom : dihAngles[currentIndex].mightClash())
+				totalEnergy += CalcEnergy.calculateEnergy(clashAtom, dihAngles[currentIndex].clashesWith(), group, chain);
 
 			// If not on the last dihedral angle, continue to rotate the later angles
 			if (currentIndex < dihAngles.length - 1) {
-				int[] newCurrentAngles = Arrays.copyOf(currentAngles, currentAngles.length + 1);
-				newCurrentAngles[currentIndex] = i;
-				rotateFindEnergy(currentIndex + 1, newCurrentAngles, totalEnergy);
+				currentAngles[currentIndex] = i;
+				rotateFindEnergy(currentIndex + 1, currentAngles, totalEnergy);
 			}
+
 			// If on the last dihedral angle, calculate the energy of the entire side chain
 			else {
 				// Save the lowest energy and the angle of rotation from the initial orientation
 				if (totalEnergy < lowestTotalEnergy) {
 					lowestTotalEnergy = totalEnergy;
 					lowestEnergyAngles.clear();
-					lowestEnergyAngles.add(new int[dihAngles.length]);
-					lowestEnergyAngles.get(lowestEnergyAngles.size() - 1)[currentIndex] = i;
-
-					// Save lower chi angles to lowestEnergyAngles
-					for (int a = 0; a < currentAngles.length; a++) {
-						lowestEnergyAngles.get(lowestEnergyAngles.size() - 1)[a] = currentAngles[a];
-					}
 				}
-				else if (totalEnergy == lowestTotalEnergy) {
-					lowestEnergyAngles.add(new int[dihAngles.length]);
-					lowestEnergyAngles.get(lowestEnergyAngles.size() - 1)[currentIndex] = i;
-
-					// Save lower chi angles to lowestEnergyAngles
-					for (int a = 0; a < currentAngles.length; a++) {
-						lowestEnergyAngles.get(lowestEnergyAngles.size() - 1)[a] = currentAngles[a];
-					}
+				// record the current angles as competitors for the lowest energy
+				if (totalEnergy <= lowestTotalEnergy) {
+					currentAngles[currentIndex] = i;
+					lowestEnergyAngles.add(currentAngles.clone());
 				}
 			}
 		}
@@ -163,15 +149,48 @@ public class Rotator {
 	 *
 	 * @param dih the index of the dihedral angle currently being worked on
 	 */
-	private void rotateFast(int dih) {
-		Atom atom1 = group.getAtom(dihAngles[dih].a2());
-		Atom atom2 = group.getAtom(dihAngles[dih].a3());
+	private void rotateFast(int currentIndex, int[] currentAngles, double currentEnergy) {
+		Atom atom1 = group.getAtom(dihAngles[currentIndex].a2());
+		Atom atom2 = group.getAtom(dihAngles[currentIndex].a3());
 		RotationAxis dihedralAxis = new RotationAxis(Calc.subtract(atom1, atom2), atom2, 0);
-		
-		// Define all atoms
-		Atom[] rotatingAtoms = Arrays.stream(dihAngles[dih].rotations()).map(a -> group.getAtom(a)).toArray(Atom[]::new);
 
-		// Optimized energy calculation and rotation code:
+		// Define all atoms
+		Atom[] rotatingAtoms = Arrays.stream(dihAngles[currentIndex].rotations()).map(a -> group.getAtom(a)).toArray(Atom[]::new);
+
+		for (int i = 0; i < 360; i += 5) {
+			// Rotate all connected atoms
+			if (i != 0)
+				dihedralAxis.rotate(rotatingAtoms, Math.toRadians(5));
+
+			// Calculate energy of the current dihedral angle
+			double totalEnergy = currentEnergy;
+			for (String clashAtom : dihAngles[currentIndex].mightClash())
+				totalEnergy += CalcEnergy.calculateEnergy(clashAtom, dihAngles[currentIndex].clashesWith(), group, chain);
+
+			// Don't recurse if we're over the energy threshold
+			if (totalEnergy > lowestTotalEnergy)
+				continue;
+
+			// If not on the last dihedral angle, continue to rotate the later angles
+			if (currentIndex < dihAngles.length - 1) {
+				currentAngles[currentIndex] = i;
+				rotateFindEnergy(currentIndex + 1, currentAngles, totalEnergy);
+			}
+
+			// If on the last dihedral angle, calculate the energy of the entire side chain
+			else {
+				// Save the lowest energy and the angle of rotation from the initial orientation
+				if (totalEnergy < lowestTotalEnergy) {
+					lowestTotalEnergy = totalEnergy;
+					lowestEnergyAngles.clear();
+				}
+				// record the current angles as competitors for the lowest energy
+				if (totalEnergy <= lowestTotalEnergy) {
+					currentAngles[currentIndex] = i;
+					lowestEnergyAngles.add(currentAngles.clone());
+				}
+			}
+		}
 	}
 
 	/**
@@ -183,8 +202,9 @@ public class Rotator {
 		DihedralAngle[] dihAngles = DihedralAngle.getDihedrals(group.getPDBName());
 
 		// Rotate the amino acid and find the lowest energy angle
-		rotateFindEnergy(0, new int[] {}, 0);
-		
+		// rotateFindEnergy(0, (int[]) Array.newInstance(int.class, dihAngles.length), 0);
+		rotateFast(0, (int[]) Array.newInstance(int.class, dihAngles.length), 0);
+
 		// Report the best angles of rotation and their total energy
 		for (int i = 0; i < lowestEnergyAngles.size(); i++) {
 			System.out.print("The best angles of rotation were -> [");
@@ -193,12 +213,13 @@ public class Rotator {
 			}
 			System.out.println("]");
 		}
-		System.out.println("\nThe total energy of " + (dihAngles.length > 1 ? "these rotations" : "this rotation") + " was " + lowestTotalEnergy);
+		System.out.println("\nThe total energy of " + (dihAngles.length > 1 ? "these rotations" : "this rotation") + " was "
+				+ lowestTotalEnergy);
 
 		// Reset the dihedral angle to its initial orientation
 		int[] resetArray = new int[dihAngles.length];
-    Arrays.fill(resetArray, 5);     
-    rotateSingleResidue(resetArray);
+		Arrays.fill(resetArray, 5);
+		rotateSingleResidue(resetArray);
 
 		// Rotate the side chain to the lowest energy angle
 		rotateSingleResidue(lowestEnergyAngles.get(0));
