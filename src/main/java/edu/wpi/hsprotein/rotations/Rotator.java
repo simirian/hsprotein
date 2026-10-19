@@ -174,7 +174,7 @@ public class Rotator {
 			// If not on the last dihedral angle, continue to rotate the later angles
 			if (currentIndex < dihAngles.length - 1) {
 				currentAngles[currentIndex] = i;
-				rotateFindEnergy(currentIndex + 1, currentAngles, totalEnergy);
+				rotateFast(currentIndex + 1, currentAngles, totalEnergy);
 			}
 
 			// If on the last dihedral angle, calculate the energy of the entire side chain
@@ -202,7 +202,6 @@ public class Rotator {
 		DihedralAngle[] dihAngles = DihedralAngle.getDihedrals(group.getPDBName());
 
 		// Rotate the amino acid and find the lowest energy angle
-		// rotateFindEnergy(0, (int[]) Array.newInstance(int.class, dihAngles.length), 0);
 		rotateFast(0, (int[]) Array.newInstance(int.class, dihAngles.length), 0);
 
 		// Report the best angles of rotation and their total energy
