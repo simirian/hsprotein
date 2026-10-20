@@ -184,11 +184,10 @@ public class Rotator {
 					lowestTotalEnergy = totalEnergy;
 					lowestEnergyAngles.clear();
 				}
-				// record the current angles as competitors for the lowest energy
-				if (totalEnergy <= lowestTotalEnergy) {
-					currentAngles[currentIndex] = i;
-					lowestEnergyAngles.add(currentAngles.clone());
-				}
+				// Record the current angles as competitors for the lowest energy
+				// (the check above makes sure we aren't over the lowest when we get here)
+				currentAngles[currentIndex] = i;
+				lowestEnergyAngles.add(currentAngles.clone());
 			}
 		}
 	}
