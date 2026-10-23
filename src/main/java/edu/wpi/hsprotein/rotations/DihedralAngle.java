@@ -369,4 +369,48 @@ public record DihedralAngle(
     else
       return 360 - angle;
   }
+
+	public static double getRadius(String resName) {
+		switch (resName.toLowerCase()) {
+			case "ala":
+				return 4;
+			case "cys":
+				return 5.5;
+			case "asp":
+				return 6.5;
+			case "glu":
+				return 7;
+			case "phe":
+				return 9;
+			case "his":
+				return 8;
+			case "ile":
+				return 7;
+			case "lys":
+				return 9.5;
+			case "leu":
+				return 7;
+			case "met":
+				return 9;
+			case "asn":
+				return 7;
+			case "gln":
+				return 7.5;
+			case "arg":
+				return 10;
+			case "ser":
+				return 5.5;
+			case "thr":
+				return 6.5;
+			case "val":
+				return 6;
+			case "trp":
+				return 10.5;
+			case "tyr":
+				return 10;
+			default:
+				// we don't do anything with these residues so we can safely give 0
+				return 0;
+		}
+	}
 }

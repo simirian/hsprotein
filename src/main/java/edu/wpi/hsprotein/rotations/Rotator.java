@@ -4,6 +4,7 @@ package edu.wpi.hsprotein.rotations;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedList;
 
 import org.biojava.nbio.structure.Atom;
 import org.biojava.nbio.structure.Calc;
@@ -12,17 +13,31 @@ import org.biojava.nbio.structure.Group;
 import org.biojava.nbio.structure.align.util.RotationAxis;
 
 /**
+ * InnerRotator
+ */
+final record DihedralAtomCache(
+		Atom a1, Atom a2, Atom a3, Atom a4,
+		Atom[] rotations,
+		Atom[] mightClash,
+		Atom[] clashesWith) {
+}
+
+/**
  * A class containing all rotational operations. Will be greatly expanded in the future.
  */
 public class Rotator {
 	Group group;
 	Chain chain;
+	String resName;
 	Boolean shouldSaveEnergy;
 	DihedralAngle[] dihAngles;
 
 	double lowestTotalEnergy;
 	ArrayList<int[]> lowestEnergyAngles;
 	double[] allEnergy;
+
+	Atom[] nearAtoms;
+	DihedralAtomCache[] atomCaches;
 
 	/**
 	 * An object representing the rotation of the provided amino acid group.
@@ -34,38 +49,61 @@ public class Rotator {
 	public Rotator(Group group, Chain chain, boolean saveEnergy) {
 		this.group = group;
 		this.chain = chain;
+		resName = group.getPDBName();
 		shouldSaveEnergy = saveEnergy;
-		dihAngles = DihedralAngle.getDihedrals(group.getPDBName());
+		dihAngles = DihedralAngle.getDihedrals(resName);
+
 		lowestTotalEnergy = Integer.MAX_VALUE;
 		lowestEnergyAngles = new ArrayList<>();
 
+		// Only save energy if necessary due to storage size
+		// if (saveEnergy) {
+		// 	if (dihAngles.length > 5) {
+		// 		System.out.println("Cannot save all energy outputs for each dihedral angle due to storage capacity issues.");
+		// 	} else {
+		// 		System.out.println("going to blow the heap with " + dihAngles.length + " angles");
+		// 		allEnergy = new double[(int) Math.pow(360 / 5, dihAngles.length)];
+		// 	}
+		// }
+
+		// Get the nearby atoms to generate the atom cache
+		Atom center = group.getAtom("CB");
+		if (center == null)
+			throw new RuntimeException("Residue missing CB!");
+		double radius = DihedralAngle.getRadius(resName);
+		nearAtoms = CalcEnergy.getNearAtoms(center, radius, chain);
+
+		// Generate the atom cache for this residue
+		LinkedList<DihedralAtomCache> cacheList = new LinkedList<DihedralAtomCache>();
+		for (DihedralAngle dih : dihAngles) {
+			LinkedList<Atom> clashesWith = new LinkedList<Atom>();
+			// We can clash with only nearby atoms from other residues, or ones from this residue which are in the clashesWith list
+			for (Atom atom : nearAtoms)
+				if (atom.getGroup().getResidueNumber() != group.getResidueNumber()
+						|| Arrays.stream(dih.clashesWith()).anyMatch(atom.getName()::equals))
+					clashesWith.add(atom);
+			DihedralAtomCache cache = new DihedralAtomCache(
+					group.getAtom(dih.a1()), group.getAtom(dih.a2()), group.getAtom(dih.a3()), group.getAtom(dih.a4()),
+					Arrays.stream(dih.rotations()).map(e -> group.getAtom(e)).filter(e -> e != null).toArray(Atom[]::new),
+					Arrays.stream(dih.mightClash()).map(e -> group.getAtom(e)).filter(e -> e != null).toArray(Atom[]::new),
+					clashesWith.toArray(Atom[]::new));
+			cacheList.add(cache);
+		}
+		atomCaches = cacheList.toArray(DihedralAtomCache[]::new);
+
 		// Zero out the dihedral angles of the amino acid
 		zeroOutAminoAcid();
-
-		// Only save energy if necessary due to storage size
-		if (saveEnergy) {
-			if (dihAngles.length > 5) {
-				System.out.println("Cannot save all energy outputs for each dihedral angle due to storage capacity issues.");
-			} else {
-				allEnergy = new double[(int) Math.pow(360 / 5, dihAngles.length)];
-			}
-		}
 	}
 
 	/**
-	 * Calculates the current output of the amino acid from its "true zero" position and resets it to that value.
+	 * Calculates the current output of the amino acid from its "true zero" position
+	 * and resets it to that value.
 	 */
 	private void zeroOutAminoAcid() {
-		for (int i = 0; i < dihAngles.length; i++) {
-			Atom atom1 = group.getAtom(dihAngles[i].a1());
-			Atom atom2 = group.getAtom(dihAngles[i].a2());
-			Atom atom3 = group.getAtom(dihAngles[i].a3());
-			Atom atom4 = group.getAtom(dihAngles[i].a4());
-			RotationAxis dihedralAxis = new RotationAxis(Calc.subtract(atom2, atom3), atom3, 0);
-			Atom[] rotatingAtoms = Arrays.stream(dihAngles[i].rotations()).map(a -> group.getAtom(a)).toArray(Atom[]::new);
-
-			// Rotate all connected atoms
-			dihedralAxis.rotate(rotatingAtoms, Math.toRadians(DihedralAngle.calcAngle(atom1, atom2, atom3, atom4)));
+		for (DihedralAtomCache cache : atomCaches) {
+			RotationAxis dihedralAxis = new RotationAxis(Calc.subtract(cache.a2(), cache.a3()), cache.a3(), 0);
+			dihedralAxis.rotate(cache.rotations(),
+					Math.toRadians(DihedralAngle.calcAngle(cache.a1(), cache.a2(), cache.a3(), cache.a4())));
 		}
 	}
 
@@ -77,21 +115,15 @@ public class Rotator {
 	 * @throws IllegalArgumentException if the length of angles is not the same as the number of dihedral angles in the group
 	 */
 	public void rotateSingleResidue(int[] angles) throws IllegalArgumentException {
-		if (dihAngles.length != angles.length) {
-			throw new IllegalArgumentException("There are " + dihAngles.length + " dihedral angles, but only " + angles.length
+		if (atomCaches.length != angles.length) {
+			throw new IllegalArgumentException("There are " + atomCaches.length + " dihedral angles, but only " + angles.length
 					+ " rotational angles were provided");
 		}
 
-		for (int i = 0; i < angles.length; i++) {
-			Atom atom1 = group.getAtom(dihAngles[i].a2());
-			Atom atom2 = group.getAtom(dihAngles[i].a3());
-			RotationAxis dihedralAxis = new RotationAxis(Calc.subtract(atom1, atom2), atom2, 0);
-
-			// Define all atoms
-			Atom[] rotatingAtoms = Arrays.stream(dihAngles[i].rotations()).map(a -> group.getAtom(a)).toArray(Atom[]::new);
-
-			// Rotate all connected atoms
-			dihedralAxis.rotate(rotatingAtoms, Math.toRadians(angles[i]));
+		for (int i = 0; i < atomCaches.length; ++i) {
+			DihedralAtomCache cache = atomCaches[i];
+			RotationAxis dihedralAxis = new RotationAxis(Calc.subtract(cache.a2(), cache.a3()), cache.a3(), 0);
+			dihedralAxis.rotate(cache.rotations(), Math.toRadians(angles[i]));
 		}
 	}
 
@@ -103,25 +135,22 @@ public class Rotator {
 	 * @param currentEnergy the calculated energy of the previously rotated dihedral angles
 	 */
 	private void rotateFindEnergy(int currentIndex, int[] currentAngles, double currentEnergy) {
-		Atom atom1 = group.getAtom(dihAngles[currentIndex].a2());
-		Atom atom2 = group.getAtom(dihAngles[currentIndex].a3());
+		Atom atom1 = atomCaches[currentIndex].a2();
+		Atom atom2 = atomCaches[currentIndex].a3();
 		RotationAxis dihedralAxis = new RotationAxis(Calc.subtract(atom1, atom2), atom2, 0);
-
-		// Define all atoms
-		Atom[] rotatingAtoms = Arrays.stream(dihAngles[currentIndex].rotations()).map(a -> group.getAtom(a)).toArray(Atom[]::new);
 
 		for (int i = 0; i < 360; i += 5) {
 			// Rotate all connected atoms
 			if (i != 0)
-				dihedralAxis.rotate(rotatingAtoms, Math.toRadians(5));
+				dihedralAxis.rotate(atomCaches[currentIndex].rotations(), Math.toRadians(5));
 
 			// Calculate energy of the current dihedral angle
 			double totalEnergy = currentEnergy;
-			for (String clashAtom : dihAngles[currentIndex].mightClash())
-				totalEnergy += CalcEnergy.calculateEnergy(clashAtom, dihAngles[currentIndex].clashesWith(), group, chain);
+			for (Atom clashAtom : atomCaches[currentIndex].mightClash())
+				totalEnergy += CalcEnergy.calculateEnergy(clashAtom, atomCaches[currentIndex].clashesWith());
 
 			// If not on the last dihedral angle, continue to rotate the later angles
-			if (currentIndex < dihAngles.length - 1) {
+			if (currentIndex < atomCaches.length - 1) {
 				currentAngles[currentIndex] = i;
 				rotateFindEnergy(currentIndex + 1, currentAngles, totalEnergy);
 			}
@@ -150,29 +179,26 @@ public class Rotator {
 	 * @param dih the index of the dihedral angle currently being worked on
 	 */
 	private void rotateFast(int currentIndex, int[] currentAngles, double currentEnergy) {
-		Atom atom1 = group.getAtom(dihAngles[currentIndex].a2());
-		Atom atom2 = group.getAtom(dihAngles[currentIndex].a3());
+		Atom atom1 = atomCaches[currentIndex].a2();
+		Atom atom2 = atomCaches[currentIndex].a3();
 		RotationAxis dihedralAxis = new RotationAxis(Calc.subtract(atom1, atom2), atom2, 0);
-
-		// Define all atoms
-		Atom[] rotatingAtoms = Arrays.stream(dihAngles[currentIndex].rotations()).map(a -> group.getAtom(a)).toArray(Atom[]::new);
 
 		for (int i = 0; i < 360; i += 5) {
 			// Rotate all connected atoms
 			if (i != 0)
-				dihedralAxis.rotate(rotatingAtoms, Math.toRadians(5));
+				dihedralAxis.rotate(atomCaches[currentIndex].rotations(), Math.toRadians(5));
 
 			// Calculate energy of the current dihedral angle
 			double totalEnergy = currentEnergy;
-			for (String clashAtom : dihAngles[currentIndex].mightClash())
-				totalEnergy += CalcEnergy.calculateEnergy(clashAtom, dihAngles[currentIndex].clashesWith(), group, chain);
+			for (Atom clashAtom : atomCaches[currentIndex].mightClash())
+				totalEnergy += CalcEnergy.calculateEnergy(clashAtom, atomCaches[currentIndex].clashesWith());
 
 			// Don't recurse if we're over the energy threshold
 			if (totalEnergy > lowestTotalEnergy)
 				continue;
 
 			// If not on the last dihedral angle, continue to rotate the later angles
-			if (currentIndex < dihAngles.length - 1) {
+			if (currentIndex < atomCaches.length - 1) {
 				currentAngles[currentIndex] = i;
 				rotateFast(currentIndex + 1, currentAngles, totalEnergy);
 			}
@@ -198,24 +224,22 @@ public class Rotator {
 	 * Then, sets the structure of the amino acid to the first of those angle combinations.
 	 */
 	public void rotateToLowestEnergy() {
-		DihedralAngle[] dihAngles = DihedralAngle.getDihedrals(group.getPDBName());
-
 		// Rotate the amino acid and find the lowest energy angle
-		rotateFast(0, (int[]) Array.newInstance(int.class, dihAngles.length), 0);
+		rotateFast(0, (int[]) Array.newInstance(int.class, atomCaches.length), 0);
 
 		// Report the best angles of rotation and their total energy
 		for (int i = 0; i < lowestEnergyAngles.size(); i++) {
 			System.out.print("The best angles of rotation were -> [");
-			for (int j = 0; j < dihAngles.length; j++) {
-				System.out.print(lowestEnergyAngles.get(i)[j] + "°" + (j == dihAngles.length - 1 ? "" : ", "));
+			for (int j = 0; j < atomCaches.length; j++) {
+				System.out.print(lowestEnergyAngles.get(i)[j] + "°" + (j == atomCaches.length - 1 ? "" : ", "));
 			}
 			System.out.println("]");
 		}
-		System.out.println("\nThe total energy of " + (dihAngles.length > 1 ? "these rotations" : "this rotation") + " was "
+		System.out.println("\nThe total energy of " + (atomCaches.length > 1 ? "these rotations" : "this rotation") + " was "
 				+ lowestTotalEnergy);
 
 		// Reset the dihedral angle to its initial orientation
-		int[] resetArray = new int[dihAngles.length];
+		int[] resetArray = new int[atomCaches.length];
 		Arrays.fill(resetArray, 5);
 		rotateSingleResidue(resetArray);
 

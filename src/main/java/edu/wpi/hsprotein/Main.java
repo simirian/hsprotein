@@ -49,8 +49,11 @@ class Main {
 		System.out.println("\n" + aminoAcid.getPDBName() + ": " + aminoAcid.getAtoms().stream().map(a -> a.getName()).collect(Collectors.joining(", ")) + "\n");
 
 		// Rotate the provided residue to its lowest energy position
+		long start = System.nanoTime();
 		Rotator rotation = new Rotator(aminoAcid, proteinChain, getEnergyTag);
 		rotation.rotateToLowestEnergy();
+		long end = System.nanoTime();
+		System.out.println("Elapsed rotation time: " + ((double)(end - start) / 1000_000_000));
 
 		// Output rotated file
 		pManager.export(aminoAcid.getPDBName() + (residueID + 1));
