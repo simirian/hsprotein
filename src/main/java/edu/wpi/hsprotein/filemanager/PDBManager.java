@@ -4,26 +4,33 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
+import org.biojava.nbio.structure.io.FileParsingParameters;
 import org.biojava.nbio.structure.io.PDBFileReader;
 import org.biojava.nbio.structure.Structure;
 
 /**
- * {@inheritDoc}
+ * Public interface that handles file loading, structuring, and outputting independent of file type.
+ * All file-type-specific actions are handled by package-private implementing classes.
  * Handles {@code .pdb} files.
  */
 class PDBManager implements ProteinManager {
-	String filepath = "";
+	String input_filepath = "";
+	String output_directory = "";
 	PDBFileReader pdbReader = new PDBFileReader();
+	FileParsingParameters fpp = new FileParsingParameters();
 	Structure struct;
 
-	PDBManager(String filepath) {
-		this.filepath = filepath;
+	PDBManager(String input_filepath, String output_directory) {
+		this.input_filepath = input_filepath;
+		this.output_directory = output_directory;
+		fpp.setCreateAtomBonds(true);
+		pdbReader.setFileParsingParameters(fpp);
 	}
 
 	@Override
 	public Structure getStructure() {
 		try {
-			struct = pdbReader.getStructure(filepath);
+			struct = pdbReader.getStructure(input_filepath);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -32,15 +39,15 @@ class PDBManager implements ProteinManager {
 	}
 
 	@Override
-	public void export(String outputDirectory) {
+	public void export(String residueName) {
 		// Find filename that doesn't exist in outputDirectory
-		int num = 0;
-		String structName = struct.getName().equals("") ? "rotated_PDB_Protein" : struct.getName();
+		int num = 1;
+		String structName = "rotated_" + (residueName != "" ? residueName : (struct.getName().equals("") ? "PDB_Protein" : struct.getName()));
 		String filename = structName + ".pdb";
-		File file = new File(outputDirectory, filename);
+		File file = new File(output_directory, filename);
 		while (file.exists()) {
-			filename = structName + (num++) + ".pdb";
-			file = new File(outputDirectory, filename);
+			filename = structName + "_" + (num++) + ".pdb";
+			file = new File(output_directory, filename);
 		}
 
 		// Write to PDB file

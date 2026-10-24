@@ -1,5 +1,8 @@
 package edu.wpi.hsprotein.rotations;
 
+import org.biojava.nbio.structure.Atom;
+import org.biojava.nbio.structure.Calc;
+
 final class Constants {
   public static final DihedralAngle[] alanine = new DihedralAngle[] {
       new DihedralAngle("N", "CA", "CB", "HB1",
@@ -21,7 +24,7 @@ final class Constants {
 
   public static final DihedralAngle[] asparticAcid = new DihedralAngle[] {
       new DihedralAngle("N", "CA", "CB", "CG",
-          new String[] { "HB2", "HB3", "CG",  "OD1", "OD2" },
+          new String[] { "HB2", "HB3", "CG", "OD1", "OD2" },
           new String[] { "HB2", "HB3", "CG" },
           new String[] { "N", "H", "C", "O", "HA" }),
       new DihedralAngle("CA", "CB", "CG", "OD1",
@@ -85,19 +88,16 @@ final class Constants {
       new DihedralAngle("CA", "CB", "CG2", "HG21",
           new String[] { "HG21", "HG22", "HG23" },
           new String[] { "HG21", "HG22", "HG23" },
-          new String[] { "N", "H", "C", "O", "HA", "HB", "HG12", "HG13", "HD11", "HD12", "HD13", "CD1", "CA", "CB",
-              "CG1" }),
+          new String[] { "N", "H", "C", "O", "HA", "HB", "HG12", "HG13", "HD11", "HD12", "HD13", "CD1", "CA", "CB", "CG1" }),
   };
 
   public static final DihedralAngle[] lysine = new DihedralAngle[] {
       new DihedralAngle("N", "CA", "CB", "CG",
-          new String[] { "CG", "CD", "CE", "NZ", "HZ1", "HZ2", "HZ3", "HE2", "HE3", "HD2", "HE3", "HD2", "HD3", "HG2",
-              "HG3", "HB2", "HB3" },
+          new String[] { "CG", "CD", "CE", "NZ", "HZ1", "HZ2", "HZ3", "HE2", "HE3", "HD2", "HE3", "HD2", "HD3", "HG2", "HG3", "HB2", "HB3" },
           new String[] { "HB2", "HB3", "CG" },
           new String[] { "N", "H", "C", "O", "HA" }),
       new DihedralAngle("CA", "CB", "CG", "CD",
-          new String[] { "NZ", "HZ1", "HZ2", "HZ3", "HE2", "HE3", "HD2", "HE3", "HD2", "HD3", "HG2", "HG3", "CD",
-              "CE" },
+          new String[] { "NZ", "HZ1", "HZ2", "HZ3", "HE2", "HE3", "HD2", "HE3", "HD2", "HD3", "HG2", "HG3", "CD", "CE" },
           new String[] { "CD", "HG2", "HG3" },
           new String[] { "N", "H", "C", "O", "HA", "HB2", "HB3", "CA" }),
       new DihedralAngle("CB", "CG", "CD", "CE",
@@ -111,8 +111,7 @@ final class Constants {
       new DihedralAngle("CD", "CE", "NZ", "HZ1",
           new String[] { "HZ1", "HZ2", "HZ3" },
           new String[] { "HZ1", "HZ2", "HZ3" },
-          new String[] { "N", "H", "C", "O", "HA", "HB2", "HB3", "HG2", "HG3", "HD2", "HD3", "HE2", "HE3", "CA",
-              "CB", "CG", "CD" }),
+          new String[] { "N", "H", "C", "O", "HA", "HB2", "HB3", "HG2", "HG3", "HD2", "HD3", "HE2", "HE3", "CA", "CB", "CG", "CD" }),
   };
 
   public static final DihedralAngle[] leucine = new DihedralAngle[] {
@@ -183,13 +182,11 @@ final class Constants {
 
   public static final DihedralAngle[] arginine = new DihedralAngle[] {
       new DihedralAngle("N", "CA", "CB", "CG",
-          new String[] { "CG", "CD", "NE", "CZ", "NH1", "HH11", "HH12", "NH2", "HH21", "HH22", "HE", "HD2", "HD3",
-              "HG2", "HG3", "HB2", "HB3" },
+          new String[] { "CG", "CD", "NE", "CZ", "NH1", "HH11", "HH12", "NH2", "HH21", "HH22", "HE", "HD2", "HD3", "HG2", "HG3", "HB2", "HB3" },
           new String[] { "HB2", "HB3", "CG" },
           new String[] { "N", "H", "C", "O", "HA" }),
       new DihedralAngle("CA", "CB", "CG", "CD",
-          new String[] { "CD", "NE", "CZ", "NH1", "HH11", "HH12", "NH2", "HH21", "HH22", "HE", "HD2", "HD3", "HG2",
-              "HG3" },
+          new String[] { "CD", "NE", "CZ", "NH1", "HH11", "HH12", "NH2", "HH21", "HH22", "HE", "HD2", "HD3", "HG2", "HG3" },
           new String[] { "HG2", "HG3", "CD" },
           new String[] { "N", "H", "C", "O", "HA", "HB2", "HB3", "CA" }),
       new DihedralAngle("CB", "CG", "CD", "NE",
@@ -245,15 +242,12 @@ final class Constants {
 
   public static final DihedralAngle[] tryptophan = new DihedralAngle[] {
       new DihedralAngle("N", "CA", "CB", "CG",
-          new String[] { "CG", "CD1", "HD1", "NE1", "HE1", "CD2", "CE2", "CZ2", "HZ2", "CH2", "HH2", "CE3", "HE3",
-              "CZ3", "HZ3", "HB2", "HB3" },
+          new String[] { "CG", "CD1", "HD1", "NE1", "HE1", "CD2", "CE2", "CZ2", "HZ2", "CH2", "HH2", "CE3", "HE3", "CZ3", "HZ3", "HB2", "HB3" },
           new String[] { "HB2", "HB3", "CG" },
           new String[] { "N", "H", "C", "O", "HA" }),
       new DihedralAngle("CA", "CB", "CG", "CD1",
-          new String[] { "CD1", "HD1", "NE1", "HE1", "CD2", "CE2", "CZ2", "HZ2", "CH2", "HH2", "CE3", "HE3", "CZ3",
-              "HZ3" },
-          new String[] { "HD1", "HE1", "HZ2", "HH2", "HE3", "HZ3", "CD1", "CD2", "NE1", "CE2", "CZ2", "CH2", "CE3",
-              "CZ3" },
+          new String[] { "CD1", "HD1", "NE1", "HE1", "CD2", "CE2", "CZ2", "HZ2", "CH2", "HH2", "CE3", "HE3", "CZ3", "HZ3" },
+          new String[] { "HD1", "HE1", "HZ2", "HH2", "HE3", "HZ3", "CD1", "CD2", "NE1", "CE2", "CZ2", "CH2", "CE3", "CZ3" },
           new String[] { "N", "H", "C", "O", "HA", "HB2", "HB3", "CA" }),
   };
 
@@ -269,8 +263,7 @@ final class Constants {
       new DihedralAngle("CE1", "CZ", "OH", "HH",
           new String[] { "HH" },
           new String[] { "HH" },
-          new String[] { "N", "H", "C", "O", "HA", "HB2", "HB3", "HD1", "HE1", "HD2", "HE2", "CA", "CB", "CG", "CD1",
-              "CD2", "CE1", "CE2" }),
+          new String[] { "N", "H", "C", "O", "HA", "HB2", "HB3", "HD1", "HE1", "HD2", "HE2", "CA", "CB", "CG", "CD1", "CD2", "CE1", "CE2" }),
   };
 }
 
@@ -278,7 +271,9 @@ final class Constants {
  * Defines all dihedral angles of the 20 amino acids.
  * Each record also contains the atoms that will be rotated around each of its dihedral angles,
  * and the atoms with which these rotated atoms might clash (physically overlap) with.
- * <p>All atoms are identified through their PDB Atom Names.</p>
+ * <p>
+ * All atoms are identified through their PDB Atom Names.
+ * </p>
  *
  * @param a1 the first rotatable atom on the dihedral bond
  * @param a2 the first atom which defines the dihedral axis
@@ -292,15 +287,14 @@ public record DihedralAngle(
     String a1, String a2, String a3, String a4,
     String[] rotations,
     String[] mightClash,
-    String[] clashesWith
-	) {
+    String[] clashesWith) {
 
-	/**
-	 * Get all dihedral angle information about a given amino acid based on its 3-letter code.
-	 *
-	 * @param residue the 3-letter code of the amino acid
-	 * @return a record of all dihedral angle information for the amino acid
-	 */
+  /**
+   * Get all dihedral angle information about a given amino acid based on its 3-letter code.
+   *
+   * @param residue the 3-letter code of the amino acid
+   * @return a record of all dihedral angle information for the amino acid
+   */
   public static DihedralAngle[] getDihedrals(String residue) {
     switch (residue.toLowerCase()) {
       case "ala":
@@ -346,5 +340,33 @@ public record DihedralAngle(
       default:
         return null;
     }
+  }
+
+  /**
+   * Calculates the dihedral angle between four atoms,
+	 * with 0 degrees being the state where all four atoms are perfectly aligned.
+	 *
+   * @param a The first point which is free to rotate.
+   * @param b The first point on the dihedral axis.
+   * @param c The second point on the dihedral axis.
+   * @param d The second point which is free to rotate.
+   * @return The angle between `a` and `d` across the axis `b-c`.
+   */
+  public static double calcAngle(Atom a, Atom b, Atom c, Atom d) {
+    // Calculate angle with dot product of the plane normals
+    Atom abc = Calc.vectorProduct(Calc.subtract(a, b), Calc.subtract(c, b));
+    abc = Calc.scale(abc, 1 / Calc.amount(abc));
+    Atom bcd = Calc.vectorProduct(Calc.subtract(b, c), Calc.subtract(d, c));
+    bcd = Calc.scale(bcd, 1 / Calc.amount(bcd));
+    double angle = Calc.angle(abc, bcd);
+    // Check if d is "under" or "over" the abc place, if under then we use -angle
+    Atom plane = Calc.subtract(d, a);
+    plane.setX(plane.getX() * abc.getX());
+    plane.setY(plane.getY() * abc.getY());
+    plane.setZ(plane.getZ() * abc.getZ());
+    if (plane.getX() + plane.getY() + plane.getZ() < 0)
+      return angle;
+    else
+      return 360 - angle;
   }
 }
