@@ -56,7 +56,7 @@ final class Constants {
   public static final DihedralAngle[] phenylalanine = new DihedralAngle[] {
       new DihedralAngle("N", "CA", "CB", "CG",
           new String[] { "CG", "HB2", "HB3", "HD1", "HD2", "HE1", "HE2", "HZ", "CD1", "CD2", "CZ", "CE1", "CE2" },
-          new String[] { "GC", "HB2", "HB3" },
+          new String[] { "CG", "HB2", "HB3" },
           new String[] { "N", "C", "HA", "O", "H" }),
       new DihedralAngle("CA", "CB", "CG", "CD1",
           new String[] { "HD1", "HD2", "HE1", "HE2", "HZ", "CD1", "CD2", "CZ", "CE1", "CE2" },
