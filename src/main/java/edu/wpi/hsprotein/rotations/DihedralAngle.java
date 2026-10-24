@@ -1,5 +1,8 @@
 package edu.wpi.hsprotein.rotations;
 
+import org.biojava.nbio.structure.Atom;
+import org.biojava.nbio.structure.Calc;
+
 final class Constants {
   public static final DihedralAngle[] alanine = new DihedralAngle[] {
       new DihedralAngle("N", "CA", "CB", "HB1",
@@ -284,7 +287,9 @@ final class Constants {
  * Defines all dihedral angles of the 20 amino acids.
  * Each record also contains the atoms that will be rotated around each of its dihedral angles,
  * and the atoms with which these rotated atoms might clash (physically overlap) with.
- * <p>All atoms are identified through their PDB Atom Names.</p>
+ * <p>
+ * All atoms are identified through their PDB Atom Names.
+ * </p>
  *
  * @param a1 the first rotatable atom on the dihedral bond
  * @param a2 the first atom which defines the dihedral axis
@@ -298,15 +303,14 @@ public record DihedralAngle(
     String a1, String a2, String a3, String a4,
     String[] rotations,
     String[] mightClash,
-    String[] clashesWith
-	) {
+    String[] clashesWith) {
 
-	/**
-	 * Get all dihedral angle information about a given amino acid based on its 3-letter code.
-	 *
-	 * @param residue the 3-letter code of the amino acid
-	 * @return a record of all dihedral angle information for the amino acid
-	 */
+  /**
+   * Get all dihedral angle information about a given amino acid based on its 3-letter code.
+   *
+   * @param residue the 3-letter code of the amino acid
+   * @return a record of all dihedral angle information for the amino acid
+   */
   public static DihedralAngle[] getDihedrals(String residue) {
     switch (residue.toLowerCase()) {
       case "ala":
@@ -352,5 +356,33 @@ public record DihedralAngle(
       default:
         return null;
     }
+  }
+
+  /**
+   * Calculates the dihedral angle between four atoms,
+	 * with 0 degrees being the state where all four atoms are perfectly aligned.
+	 *
+   * @param a The first point which is free to rotate.
+   * @param b The first point on the dihedral axis.
+   * @param c The second point on the dihedral axis.
+   * @param d The second point which is free to rotate.
+   * @return The angle between `a` and `d` across the axis `b-c`.
+   */
+  public static double calcAngle(Atom a, Atom b, Atom c, Atom d) {
+    // Calculate angle with dot product of the plane normals
+    Atom abc = Calc.vectorProduct(Calc.subtract(a, b), Calc.subtract(c, b));
+    abc = Calc.scale(abc, 1 / Calc.amount(abc));
+    Atom bcd = Calc.vectorProduct(Calc.subtract(b, c), Calc.subtract(d, c));
+    bcd = Calc.scale(bcd, 1 / Calc.amount(bcd));
+    double angle = Calc.angle(abc, bcd);
+    // Check if d is "under" or "over" the abc place, if under then we use -angle
+    Atom plane = Calc.subtract(d, a);
+    plane.setX(plane.getX() * abc.getX());
+    plane.setY(plane.getY() * abc.getY());
+    plane.setZ(plane.getZ() * abc.getZ());
+    if (plane.getX() + plane.getY() + plane.getZ() < 0)
+      return angle;
+    else
+      return 360 - angle;
   }
 }
