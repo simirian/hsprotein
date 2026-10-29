@@ -35,6 +35,7 @@ public class Rotator {
 	double lowestTotalEnergy;
 	ArrayList<int[]> lowestEnergyAngles;
 	double[] allEnergy;
+	int[] startAngles;
 
 	Atom[] nearAtoms;
 	DihedralAtomCache[] atomCaches;
@@ -93,6 +94,9 @@ public class Rotator {
 
 		// Zero out the dihedral angles of the amino acid
 		zeroOutAminoAcid();
+		startAngles = (int[])Array.newInstance(int.class, atomCaches.length);
+		Arrays.fill(startAngles, 60);
+		rotateSingleResidue(startAngles);
 	}
 
 	/**
@@ -165,6 +169,8 @@ public class Rotator {
 				// record the current angles as competitors for the lowest energy
 				if (totalEnergy <= lowestTotalEnergy) {
 					currentAngles[currentIndex] = i;
+					for (int j = 0; j < startAngles.length; ++j)
+						currentAngles[j] += startAngles[j];
 					lowestEnergyAngles.add(currentAngles.clone());
 				}
 			}
@@ -213,6 +219,8 @@ public class Rotator {
 				// Record the current angles as competitors for the lowest energy
 				// (the check above makes sure we aren't over the lowest when we get here)
 				currentAngles[currentIndex] = i;
+				for (int j = 0; j < startAngles.length; ++j)
+					currentAngles[j] += startAngles[j];
 				lowestEnergyAngles.add(currentAngles.clone());
 			}
 		}
