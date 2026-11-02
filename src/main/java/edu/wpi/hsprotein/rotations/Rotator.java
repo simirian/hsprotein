@@ -169,9 +169,10 @@ public class Rotator {
 				// record the current angles as competitors for the lowest energy
 				if (totalEnergy <= lowestTotalEnergy) {
 					currentAngles[currentIndex] = i;
+					int[] angles = currentAngles.clone();
 					for (int j = 0; j < startAngles.length; ++j)
-						currentAngles[j] += startAngles[j];
-					lowestEnergyAngles.add(currentAngles.clone());
+						angles[j] += startAngles[j];
+					lowestEnergyAngles.add(angles);
 				}
 			}
 		}
@@ -219,9 +220,10 @@ public class Rotator {
 				// Record the current angles as competitors for the lowest energy
 				// (the check above makes sure we aren't over the lowest when we get here)
 				currentAngles[currentIndex] = i;
+				int[] angles = currentAngles.clone();
 				for (int j = 0; j < startAngles.length; ++j)
-					currentAngles[j] += startAngles[j];
-				lowestEnergyAngles.add(currentAngles.clone());
+					angles[j] += startAngles[j];
+				lowestEnergyAngles.add(angles);
 			}
 		}
 	}
