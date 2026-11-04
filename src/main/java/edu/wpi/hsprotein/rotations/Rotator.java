@@ -93,10 +93,9 @@ public class Rotator {
 		atomCaches = cacheList.toArray(DihedralAtomCache[]::new);
 
 		// Zero out the dihedral angles of the amino acid
-		zeroOutAminoAcid();
 		startAngles = (int[])Array.newInstance(int.class, atomCaches.length);
 		Arrays.fill(startAngles, 60);
-		rotateSingleResidue(startAngles);
+		rotateToAngles(startAngles);
 	}
 
 	/**
@@ -118,12 +117,12 @@ public class Rotator {
 	 * @param angles the angles to rotate each dihedral angle by, in order
 	 * @throws IllegalArgumentException if the length of angles is not the same as the number of dihedral angles in the group
 	 */
-	public void rotateSingleResidue(int[] angles) throws IllegalArgumentException {
+	public void rotateToAngles(int[] angles) throws IllegalArgumentException {
 		if (atomCaches.length != angles.length) {
 			throw new IllegalArgumentException("There are " + atomCaches.length + " dihedral angles, but only " + angles.length
 					+ " rotational angles were provided");
 		}
-
+		zeroOutAminoAcid();
 		for (int i = 0; i < atomCaches.length; ++i) {
 			DihedralAtomCache cache = atomCaches[i];
 			RotationAxis dihedralAxis = new RotationAxis(Calc.subtract(cache.a2(), cache.a3()), cache.a3(), 0);
@@ -248,12 +247,7 @@ public class Rotator {
 		System.out.println("\nThe total energy of " + (atomCaches.length > 1 ? "these rotations" : "this rotation") + " was "
 				+ lowestTotalEnergy);
 
-		// Reset the dihedral angle to its initial orientation
-		int[] resetArray = new int[atomCaches.length];
-		Arrays.fill(resetArray, 5);
-		rotateSingleResidue(resetArray);
-
 		// Rotate the side chain to the lowest energy angle
-		rotateSingleResidue(lowestEnergyAngles.get(0));
+		rotateToAngles(lowestEnergyAngles.get(0));
 	}
 }
