@@ -29,7 +29,6 @@ public class Rotator {
 	Group group;
 	Chain chain;
 	String resName;
-	Boolean shouldSaveEnergy;
 	DihedralAngle[] dihAngles;
 
 	double lowestTotalEnergy;
@@ -42,30 +41,18 @@ public class Rotator {
 
 	/**
 	 * An object representing the rotation of the provided amino acid group.
-	 * 
+	 *
 	 * @param chain the protein chain containing {@code group}
 	 * @param group the group of atoms to rotate
-	 * @param saveEnergy whether to save all calculated energy outputs or not
 	 */
-	public Rotator(Group group, Chain chain, boolean saveEnergy) {
+	public Rotator(Group group, Chain chain) {
 		this.group = group;
 		this.chain = chain;
 		resName = group.getPDBName();
-		shouldSaveEnergy = saveEnergy;
 		dihAngles = DihedralAngle.getDihedrals(resName);
 
 		lowestTotalEnergy = Integer.MAX_VALUE;
 		lowestEnergyAngles = new ArrayList<>();
-
-		// Only save energy if necessary due to storage size
-		// if (saveEnergy) {
-		// 	if (dihAngles.length > 5) {
-		// 		System.out.println("Cannot save all energy outputs for each dihedral angle due to storage capacity issues.");
-		// 	} else {
-		// 		System.out.println("going to blow the heap with " + dihAngles.length + " angles");
-		// 		allEnergy = new double[(int) Math.pow(360 / 5, dihAngles.length)];
-		// 	}
-		// }
 
 		// Get the nearby atoms to generate the atom cache
 		Atom center = group.getAtom("CB");
@@ -88,6 +75,14 @@ public class Rotator {
 					Arrays.stream(dih.rotations()).map(e -> group.getAtom(e)).filter(e -> e != null).toArray(Atom[]::new),
 					Arrays.stream(dih.mightClash()).map(e -> group.getAtom(e)).filter(e -> e != null).toArray(Atom[]::new),
 					clashesWith.toArray(Atom[]::new));
+			if (cache.a1() == null)
+				throw new RuntimeException("Missing a1 " + dih.a1() + " in " + resName);
+			if (cache.a2() == null)
+				throw new RuntimeException("Missing a2 " + dih.a2() + " in " + resName);
+			if (cache.a3() == null)
+				throw new RuntimeException("Missing a3 " + dih.a3() + " in " + resName);
+			if (cache.a4() == null)
+				throw new RuntimeException("Missing a4 " + dih.a4() + " in " + resName);
 			cacheList.add(cache);
 		}
 		atomCaches = cacheList.toArray(DihedralAtomCache[]::new);
@@ -236,18 +231,23 @@ public class Rotator {
 		// Rotate the amino acid and find the lowest energy angle
 		rotateFast(0, (int[]) Array.newInstance(int.class, atomCaches.length), 0);
 
-		// Report the best angles of rotation and their total energy
-		for (int i = 0; i < lowestEnergyAngles.size(); i++) {
-			System.out.print("The best angles of rotation were -> [");
-			for (int j = 0; j < atomCaches.length; j++) {
-				System.out.print(lowestEnergyAngles.get(i)[j] + "°" + (j == atomCaches.length - 1 ? "" : ", "));
-			}
-			System.out.println("]");
-		}
-		System.out.println("\nThe total energy of " + (atomCaches.length > 1 ? "these rotations" : "this rotation") + " was "
-				+ lowestTotalEnergy);
-
 		// Rotate the side chain to the lowest energy angle
 		rotateToAngles(lowestEnergyAngles.get(0));
+	}
+
+	/**
+	 * Returns the results of a rotation.
+	 * @return An {@link ArrayList} of every set of angles tied for the lowest energy.
+	 */
+	public ArrayList<int[]> getAngles() {
+		return lowestEnergyAngles;
+	}
+
+	/**
+	 * Returns the lowest energy achieved through the rotation.
+	 * @return The lowest energy.
+	 */
+	public double getEnergy() {
+		return lowestTotalEnergy;
 	}
 }

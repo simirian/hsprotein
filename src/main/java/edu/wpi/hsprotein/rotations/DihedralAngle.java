@@ -67,8 +67,6 @@ final class Constants {
           new String[] { "CA", "HB2", "HB3", "O", "H", "N", "C", "HA" })
   };
 
-  public static final DihedralAngle[] glycine = new DihedralAngle[] {};
-
   public static final DihedralAngle[] histidine = new DihedralAngle[] {
       new DihedralAngle("N", "CA", "CB", "CG",
           new String[] { "CG", "ND1", "HD1", "CE1", "HE1", "CD2", "HD2", "NE2", "HB2", "HB3" },
@@ -172,8 +170,6 @@ final class Constants {
           new String[] { "OD1", "ND2", "HD21", "HD22" },
           new String[] { "CA", "HB2", "HB3", "O", "H", "N", "C", "HA" })
   };
-
-  public static final DihedralAngle[] proline = new DihedralAngle[] {};
 
   public static final DihedralAngle[] glutamine = new DihedralAngle[] {
       new DihedralAngle("N", "CA", "CB", "CG",
@@ -323,8 +319,6 @@ public record DihedralAngle(
         return Constants.glutamicAcid;
       case "phe":
         return Constants.phenylalanine;
-      case "gly":
-        return Constants.glycine;
       case "his":
         return Constants.histidine;
       case "ile":
@@ -337,8 +331,6 @@ public record DihedralAngle(
         return Constants.methionine;
       case "asn":
         return Constants.asparagine;
-      case "pro":
-        return Constants.proline;
       case "gln":
         return Constants.glutamine;
       case "arg":
