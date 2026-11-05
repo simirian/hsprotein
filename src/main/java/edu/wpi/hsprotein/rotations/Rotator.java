@@ -35,6 +35,7 @@ public class Rotator {
 	ArrayList<int[]> lowestEnergyAngles;
 	double[] allEnergy;
 	int[] startAngles;
+	int[] originalAngles;
 
 	Atom[] nearAtoms;
 	DihedralAtomCache[] atomCaches;
@@ -87,6 +88,11 @@ public class Rotator {
 		}
 		atomCaches = cacheList.toArray(DihedralAtomCache[]::new);
 
+		originalAngles = (int[]) Array.newInstance(int.class, atomCaches.length);
+		for (int i = 0; i < atomCaches.length; ++i)
+			originalAngles[i] = (int) DihedralAngle.calcAngle(atomCaches[i].a1(), atomCaches[i].a1(), atomCaches[i].a1(),
+					atomCaches[i].a1());
+
 		// Zero out the dihedral angles of the amino acid
 		startAngles = (int[])Array.newInstance(int.class, atomCaches.length);
 		Arrays.fill(startAngles, 60);
@@ -97,7 +103,7 @@ public class Rotator {
 	 * Calculates the current output of the amino acid from its "true zero" position
 	 * and resets it to that value.
 	 */
-	private void zeroOutAminoAcid() {
+	public void zeroOutAminoAcid() {
 		for (DihedralAtomCache cache : atomCaches) {
 			RotationAxis dihedralAxis = new RotationAxis(Calc.subtract(cache.a2(), cache.a3()), cache.a3(), 0);
 			dihedralAxis.rotate(cache.rotations(),
@@ -123,6 +129,10 @@ public class Rotator {
 			RotationAxis dihedralAxis = new RotationAxis(Calc.subtract(cache.a2(), cache.a3()), cache.a3(), 0);
 			dihedralAxis.rotate(cache.rotations(), Math.toRadians(angles[i]));
 		}
+	}
+
+	public void restoreRotation() {
+		rotateToAngles(originalAngles);
 	}
 
 	/**
@@ -249,5 +259,13 @@ public class Rotator {
 	 */
 	public double getEnergy() {
 		return lowestTotalEnergy;
+	}
+
+	/**
+	 * Gets the original angles before any rotation occurred.
+	 * @return The original angles.
+	 */
+	public int[] getOriginalAngles() {
+		return originalAngles;
 	}
 }

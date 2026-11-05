@@ -1,11 +1,15 @@
 package edu.wpi.hsprotein;
 
 import java.io.FileWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 
-import org.biojava.nbio.structure.Atom;
 import org.biojava.nbio.structure.Chain;
 import org.biojava.nbio.structure.Group;
+import org.biojava.nbio.structure.ResidueNumber;
 
 import edu.wpi.hsprotein.filemanager.ProteinManager;
 import edu.wpi.hsprotein.helpers.InputValidation;
@@ -13,17 +17,16 @@ import edu.wpi.hsprotein.rotations.DihedralAngle;
 import edu.wpi.hsprotein.rotations.Rotator;
 
 class Main {
-	public static void runResidue(Chain chain, int id, String chainName, String outDir) {
+	public static int[] runResidue(Chain chain, Group residue, String chainName, String outDir) {
 
 		// Get the residue and check that it's one we care about
-		Group residue = chain.getSeqResGroup(id);
 		String resName = residue.getPDBName();
 		System.out.println("Running residue " + chainName + " " + resName + residue.getResidueNumber());
 		if (DihedralAngle.getDihedrals(resName) == null)
-			return;
+			return null;
 
 		// Do the actual rotations
-		Rotator rotation;
+		Rotator rotation = null;
 		long start, end;
 		try {
 			start = System.nanoTime();
@@ -32,41 +35,30 @@ class Main {
 			end = System.nanoTime();
 		} catch (RuntimeException e) {
 			System.err.println("Failed to run rotations:\n" + e);
-			return;
+			if (rotation != null)
+				return rotation.getOriginalAngles();
+			return null;
 		}
+		rotation.restoreRotation();
 
 		// Write data
 		String statsFile = outDir + "/" + resName + ".csv";
-		FileWriter writer;
-		try {
-			writer = new FileWriter(statsFile, true);
-		} catch (Exception e) {
-			System.err.println("Failed to write statistics:\n" + e);
-			return;
-		}
-
-		for (int[] result : rotation.getAngles()) {
-			// chain,resnum,time,energy,angles
-			String line = chainName + ","
-					+ String.valueOf(id) + ","
-					+ (end - start) + ","
-					+ String.valueOf(rotation.getEnergy()) + ","
-					+ String.join(",", Arrays.stream(result).mapToObj(String::valueOf).toArray(String[]::new)) + "\n";
-
-			try {
+		try (FileWriter writer = new FileWriter(statsFile, true)) {
+			for (int[] result : rotation.getAngles()) {
+				// chain,resnum,time,energy,angles
+				String line = chainName + ","
+						+ residue.getResidueNumber().toString() + ","
+						+ (end - start) + ","
+						+ String.valueOf(rotation.getEnergy()) + ","
+						+ String.join(",", Arrays.stream(result).mapToObj(String::valueOf).toArray(String[]::new)) + "\n";
 				writer.write(line);
-			} catch (Exception e) {
-				System.err.println("Failed to write statistics:\n" + e);
-				return;
 			}
-		}
-
-		try {
 			writer.close();
 		} catch (Exception e) {
-			System.err.println("Failed to close writer...?\n" + e);
-			return;
+			System.err.println("Failed to write statistics:\n" + e);
 		}
+
+		return rotation.getAngles().get(0);
 	}
 
 	public static void main(String[] args) {
@@ -101,8 +93,23 @@ class Main {
 
 		// Rotate every residue in the structure
 		Chain proteinChain = pManager.getStructure().getChains().get(0);
-		for (int j = 0; j < proteinChain.getSeqResLength(); ++j)
-			Main.runResidue(proteinChain, j, fileName, outDir);
+		HashMap<ResidueNumber, int[]> angles = new HashMap<ResidueNumber, int[]>();
+		for (Group residue : proteinChain.getSeqResGroups())
+			angles.put(residue.getResidueNumber(), Main.runResidue(proteinChain, residue, fileName, outDir));
+
+		for (Group residue : proteinChain.getSeqResGroups()) {
+			if (angles.get(residue.getResidueNumber()) == null)
+				continue;
+			System.out.println(fileName + " " + residue.getPDBName() + residue.getResidueNumber() + " " + Arrays.toString(angles.get(residue.getResidueNumber())));
+			try {
+				Rotator rotator = new Rotator(residue, proteinChain);
+				rotator.rotateToAngles(angles.get(residue.getResidueNumber()));
+			} catch (Exception e) {
+				System.out.println(
+						"Failed to adjust angle for residue " + fileName + " " + residue.getPDBName() + residue.getResidueNumber()
+								+ "\n" + e);
+			}
+		}
 
 		// Export the structure
 		pManager.export(fileName);
