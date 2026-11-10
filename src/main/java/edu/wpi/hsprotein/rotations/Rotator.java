@@ -106,7 +106,7 @@ public class Rotator {
 		for (DihedralAtomCache cache : atomCaches) {
 			RotationAxis dihedralAxis = new RotationAxis(Calc.subtract(cache.a2(), cache.a3()), cache.a3(), 0);
 			dihedralAxis.rotate(cache.rotations(),
-					Math.toRadians(DihedralAngle.calcAngle(cache.a1(), cache.a2(), cache.a3(), cache.a4())));
+					Math.toRadians(-DihedralAngle.calcAngle(cache.a1(), cache.a2(), cache.a3(), cache.a4())));
 		}
 	}
 
@@ -194,10 +194,9 @@ public class Rotator {
 		Atom atom2 = atomCaches[currentIndex].a3();
 		RotationAxis dihedralAxis = new RotationAxis(Calc.subtract(atom1, atom2), atom2, 0);
 
-		for (int i = 0; i < 360; i += 5) {
+		for (int i = 5 + startAngles[currentIndex]; i < 365 + startAngles[currentIndex]; i += 5) {
 			// Rotate all connected atoms
-			if (i != 0)
-				dihedralAxis.rotate(atomCaches[currentIndex].rotations(), Math.toRadians(5));
+			dihedralAxis.rotate(atomCaches[currentIndex].rotations(), Math.toRadians(5));
 
 			// Calculate energy of the current dihedral angle
 			double totalEnergy = currentEnergy;
@@ -225,8 +224,8 @@ public class Rotator {
 				// (the check above makes sure we aren't over the lowest when we get here)
 				currentAngles[currentIndex] = i;
 				int[] angles = currentAngles.clone();
-				for (int j = 0; j < startAngles.length; ++j)
-					angles[j] += startAngles[j];
+				for (int j = 0; j < angles.length; ++j)
+					angles[j] = angles[j] % 360;
 				lowestEnergyAngles.add(angles);
 			}
 		}

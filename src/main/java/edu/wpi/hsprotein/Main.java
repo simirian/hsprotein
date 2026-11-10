@@ -18,7 +18,7 @@ class Main {
 
 		// Get the residue and check that it's one we care about
 		String resName = residue.getPDBName();
-		System.out.println("Running residue " + chainName + " " + resName + residue.getResidueNumber());
+		System.out.println("\u001B[ARunning residue " + chainName + " " + resName + residue.getResidueNumber());
 		if (DihedralAngle.getDihedrals(resName) == null)
 			return null;
 
@@ -31,7 +31,7 @@ class Main {
 			rotation.rotateToLowestEnergy();
 			end = System.nanoTime();
 		} catch (RuntimeException e) {
-			System.err.println("Failed to run rotations:\n" + e);
+			System.err.println("Failed to run rotations:\n" + e + "\n");
 			if (rotation != null)
 				return rotation.getOriginalAngles();
 			return null;
@@ -91,14 +91,13 @@ class Main {
 		// Rotate every residue in the structure
 		Chain proteinChain = pManager.getStructure().getChains().get(0);
 		HashMap<ResidueNumber, int[]> angles = new HashMap<ResidueNumber, int[]>();
+		System.out.println(""); // this is for the sake of the CUP in `runResidue()` so it doesn't overwrite anything important
 		for (Group residue : proteinChain.getSeqResGroups())
 			angles.put(residue.getResidueNumber(), Main.runResidue(proteinChain, residue, fileName, outDir));
 
 		for (Group residue : proteinChain.getSeqResGroups()) {
 			if (angles.get(residue.getResidueNumber()) == null)
 				continue;
-			System.out.println(fileName + " " + residue.getPDBName() + residue.getResidueNumber() + " "
-					+ Arrays.toString(angles.get(residue.getResidueNumber())));
 			try {
 				Rotator rotator = new Rotator(residue, proteinChain);
 				rotator.rotateToAngles(angles.get(residue.getResidueNumber()));
