@@ -1,11 +1,8 @@
 package edu.wpi.hsprotein;
 
 import java.io.FileWriter;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 
 import org.biojava.nbio.structure.Chain;
 import org.biojava.nbio.structure.Group;
@@ -100,7 +97,8 @@ class Main {
 		for (Group residue : proteinChain.getSeqResGroups()) {
 			if (angles.get(residue.getResidueNumber()) == null)
 				continue;
-			System.out.println(fileName + " " + residue.getPDBName() + residue.getResidueNumber() + " " + Arrays.toString(angles.get(residue.getResidueNumber())));
+			System.out.println(fileName + " " + residue.getPDBName() + residue.getResidueNumber() + " "
+					+ Arrays.toString(angles.get(residue.getResidueNumber())));
 			try {
 				Rotator rotator = new Rotator(residue, proteinChain);
 				rotator.rotateToAngles(angles.get(residue.getResidueNumber()));

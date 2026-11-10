@@ -90,18 +90,17 @@ public class Rotator {
 
 		originalAngles = (int[]) Array.newInstance(int.class, atomCaches.length);
 		for (int i = 0; i < atomCaches.length; ++i)
-			originalAngles[i] = (int) DihedralAngle.calcAngle(atomCaches[i].a1(), atomCaches[i].a1(), atomCaches[i].a1(),
-					atomCaches[i].a1());
+			originalAngles[i] = (int) DihedralAngle.calcAngle(atomCaches[i].a1(), atomCaches[i].a2(), atomCaches[i].a3(),
+					atomCaches[i].a4());
 
 		// Zero out the dihedral angles of the amino acid
-		startAngles = (int[])Array.newInstance(int.class, atomCaches.length);
+		startAngles = (int[]) Array.newInstance(int.class, atomCaches.length);
 		Arrays.fill(startAngles, 60);
 		rotateToAngles(startAngles);
 	}
 
 	/**
-	 * Calculates the current output of the amino acid from its "true zero" position
-	 * and resets it to that value.
+	 * Calculates the current output of the amino acid from its "true zero" position and resets it to that value.
 	 */
 	public void zeroOutAminoAcid() {
 		for (DihedralAtomCache cache : atomCaches) {
@@ -114,14 +113,15 @@ public class Rotator {
 	/**
 	 * Rotates each dihedral angle in a single residue by {@code angle[i]}°.
 	 *
-	 * @param group the group of atoms to rotate
+	 * @param group  the group of atoms to rotate
 	 * @param angles the angles to rotate each dihedral angle by, in order
 	 * @throws IllegalArgumentException if the length of angles is not the same as the number of dihedral angles in the group
 	 */
 	public void rotateToAngles(int[] angles) throws IllegalArgumentException {
 		if (atomCaches.length != angles.length) {
-			throw new IllegalArgumentException("There are " + atomCaches.length + " dihedral angles, but only " + angles.length
-					+ " rotational angles were provided");
+			throw new IllegalArgumentException(
+					"There are " + atomCaches.length + " dihedral angles, but only " + angles.length
+							+ " rotational angles were provided");
 		}
 		zeroOutAminoAcid();
 		for (int i = 0; i < atomCaches.length; ++i) {
@@ -247,6 +247,7 @@ public class Rotator {
 
 	/**
 	 * Returns the results of a rotation.
+	 * 
 	 * @return An {@link ArrayList} of every set of angles tied for the lowest energy.
 	 */
 	public ArrayList<int[]> getAngles() {
@@ -255,6 +256,7 @@ public class Rotator {
 
 	/**
 	 * Returns the lowest energy achieved through the rotation.
+	 * 
 	 * @return The lowest energy.
 	 */
 	public double getEnergy() {
@@ -263,6 +265,7 @@ public class Rotator {
 
 	/**
 	 * Gets the original angles before any rotation occurred.
+	 * 
 	 * @return The original angles.
 	 */
 	public int[] getOriginalAngles() {
