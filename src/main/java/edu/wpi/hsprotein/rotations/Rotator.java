@@ -2,7 +2,6 @@
 package edu.wpi.hsprotein.rotations;
 
 import java.lang.reflect.Array;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 
@@ -32,10 +31,11 @@ public class Rotator {
 	DihedralAngle[] dihAngles;
 
 	double lowestTotalEnergy;
-	ArrayList<int[]> lowestEnergyAngles;
+	LinkedList<int[]> lowestEnergyAngles;
 	double[] allEnergy;
 	int[] startAngles;
 	int[] originalAngles;
+	boolean cutOutEarly;
 
 	Atom[] nearAtoms;
 	DihedralAtomCache[] atomCaches;
@@ -46,14 +46,15 @@ public class Rotator {
 	 * @param chain the protein chain containing {@code group}
 	 * @param group the group of atoms to rotate
 	 */
-	public Rotator(Group group, Chain chain) {
+	public Rotator(Group group, Chain chain, boolean cutOutEarly) {
 		this.group = group;
 		this.chain = chain;
+		this.cutOutEarly = cutOutEarly;
 		resName = group.getPDBName();
 		dihAngles = DihedralAngle.getDihedrals(resName);
 
 		lowestTotalEnergy = Integer.MAX_VALUE;
-		lowestEnergyAngles = new ArrayList<>();
+		lowestEnergyAngles = new LinkedList<>();
 
 		// Get the nearby atoms to generate the atom cache
 		Atom center = group.getAtom("CB");
@@ -228,6 +229,10 @@ public class Rotator {
 					angles[j] = angles[j] % 360;
 				lowestEnergyAngles.add(angles);
 			}
+
+			// once we get a bunch of legal angles, we assume the chain is just floppy and stop
+			if (cutOutEarly && lowestEnergyAngles.size() >= 256)
+				return;
 		}
 	}
 
@@ -247,9 +252,9 @@ public class Rotator {
 	/**
 	 * Returns the results of a rotation.
 	 * 
-	 * @return An {@link ArrayList} of every set of angles tied for the lowest energy.
+	 * @return A {@link LinkedList} of every set of angles tied for the lowest energy.
 	 */
-	public ArrayList<int[]> getAngles() {
+	public LinkedList<int[]> getAngles() {
 		return lowestEnergyAngles;
 	}
 

@@ -27,7 +27,7 @@ class Main {
 		long start, end;
 		try {
 			start = System.nanoTime();
-			rotation = new Rotator(residue, chain);
+			rotation = new Rotator(residue, chain, true);
 			rotation.rotateToLowestEnergy();
 			end = System.nanoTime();
 		} catch (RuntimeException e) {
@@ -99,7 +99,7 @@ class Main {
 			if (angles.get(residue.getResidueNumber()) == null)
 				continue;
 			try {
-				Rotator rotator = new Rotator(residue, proteinChain);
+				Rotator rotator = new Rotator(residue, proteinChain, true);
 				rotator.rotateToAngles(angles.get(residue.getResidueNumber()));
 			} catch (Exception e) {
 				System.out.println(
