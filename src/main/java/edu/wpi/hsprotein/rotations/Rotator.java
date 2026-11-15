@@ -53,7 +53,7 @@ public class Rotator {
 		resName = group.getPDBName();
 		dihAngles = DihedralAngle.getDihedrals(resName);
 
-		lowestTotalEnergy = Integer.MAX_VALUE;
+		lowestTotalEnergy = Double.POSITIVE_INFINITY;
 		lowestEnergyAngles = new LinkedList<>();
 
 		// Get the nearby atoms to generate the atom cache

@@ -14,8 +14,31 @@ import edu.wpi.hsprotein.rotations.DihedralAngle;
 import edu.wpi.hsprotein.rotations.Rotator;
 
 class Main {
-	public static int[] runResidue(Chain chain, Group residue, String chainName, String outDir) {
+	public static void saveResData(String fileName, String chainName, String resNum, long time, Rotator rotation) {
+		try (FileWriter writer = new FileWriter(fileName, true)) {
+			for (int[] result : rotation.getAngles()) {
+				// chain,resnum,time,energy,angles
+				String line = chainName + "," + resNum + "," + time + ","
+						+ String.valueOf(rotation.getEnergy()) + ","
+						+ String.join(",", Arrays.stream(result).mapToObj(String::valueOf).toArray(String[]::new)) + "\n";
+				writer.write(line);
+			}
+		} catch (Exception e) {
+			System.err.println("Failed to write statistics:\n" + e);
+		}
+	}
 
+	public static void recordResError(String fileName, String chainName, String resName, String resNum) {
+		try (FileWriter writer = new FileWriter(fileName, true)) {
+			// chain,resname,resid,
+			String line = chainName + "," + resName + "," + resNum + "," + "\n";
+			writer.write(line);
+		} catch (Exception e) {
+			System.err.println("Failed to write statistics:\n" + e);
+		}
+	}
+
+	public static int[] runResidue(Chain chain, Group residue, String chainName, String outDir) {
 		// Get the residue and check that it's one we care about
 		String resName = residue.getPDBName();
 		System.out.println("\u001B[ARunning residue " + chainName + " " + resName + residue.getResidueNumber());
@@ -32,28 +55,14 @@ class Main {
 			end = System.nanoTime();
 		} catch (RuntimeException e) {
 			System.err.println("Failed to run rotations:\n" + e + "\n");
+			Main.recordResError(outDir + "/" + "missing.csv", chainName, resName.toLowerCase(), residue.getResidueNumber().toString());
 			if (rotation != null)
 				return rotation.getOriginalAngles();
 			return null;
 		}
 		rotation.restoreRotation();
-
-		// Write data
-		String statsFile = outDir + "/" + resName + ".csv";
-		try (FileWriter writer = new FileWriter(statsFile, true)) {
-			for (int[] result : rotation.getAngles()) {
-				// chain,resnum,time,energy,angles
-				String line = chainName + ","
-						+ residue.getResidueNumber().toString() + ","
-						+ (end - start) + ","
-						+ String.valueOf(rotation.getEnergy()) + ","
-						+ String.join(",", Arrays.stream(result).mapToObj(String::valueOf).toArray(String[]::new)) + "\n";
-				writer.write(line);
-			}
-			writer.close();
-		} catch (Exception e) {
-			System.err.println("Failed to write statistics:\n" + e);
-		}
+		Main.saveResData(outDir + "/" + resName.toLowerCase() + ".csv", chainName, residue.getResidueNumber().toString(), end - start,
+				rotation);
 
 		return rotation.getAngles().get(0);
 	}
