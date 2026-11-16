@@ -41,6 +41,8 @@ class Main {
 	public static int[] runResidue(Chain chain, Group residue, String chainName, String outDir) {
 		// Get the residue and check that it's one we care about
 		String resName = residue.getPDBName();
+		if (residue.getResidueNumber() == null)
+			return null;
 		System.out.println("\u001B[ARunning residue " + chainName + " " + resName + residue.getResidueNumber());
 		if (DihedralAngle.getDihedrals(resName) == null)
 			return null;
