@@ -80,68 +80,12 @@ def cif_new_with(cif: CIFFile, structure: AtomArray | AtomArrayStack) -> CIFFile
             for model in cif.keys()  # noqa
         }
     )
-    set_structure(new, structure, extra_fields=["B_iso_or_equiv"])
+    set_structure(new, structure)
     for model in new.keys():  # noqa
         if "struct_conn" in new[model]:
             del new[model]["struct_conn"]
         new[model]["struct_asym"]["pdbx_modified"].as_array()[:] = "Y"
     return new
-
-
-def remove_altlocs(cif: CIFFile) -> CIFFile:
-    """Filters out alternate locations from a CIF file."""
-    # reading the structure is enough to remove altlocs
-    s = get_structure_data(cif)
-    return cif_new_with(cif, s)
-
-
-def filter_aa(cif: CIFFile) -> CIFFile:
-    """Filters a CIF file so it only contains amino acid residues."""
-    s = get_structure_data(cif)
-    if isinstance(s, AtomArrayStack):
-        s = s[:, filter_amino_acids(s)]
-    else:
-        s = s[filter_amino_acids(s)]
-    return cif_new_with(cif, s)
-
-
-def del_h(s: AtomArray | AtomArrayStack) -> AtomArray | AtomArrayStack:
-    """Deletes hydrogen and deuterium from a structure."""
-    if isinstance(s, AtomArrayStack):
-        noh = s[:, ~(s.element == "H")]
-        return noh[:, ~(noh.element == "D")]
-    else:
-        noh = s[~(s.element == "H")]
-        return noh[~(noh.element == "D")]
-
-
-def add_h(structure: AtomArray | AtomArrayStack) -> AtomArray | AtomArrayStack:
-    """Uses Hydride to add hydrogen atoms to a structure that doesn't have them."""
-    if not isinstance(structure, AtomArrayStack):
-        structure = stack(structure)
-    arrays = []
-    for a in structure:
-        a, _ = add_hydrogen(a)
-        a.coord = relax_hydrogen(a, iterations=10000)
-        arrays.append(a)
-    structure = stack(arrays)
-    return structure
-
-
-def fix_h(cif: CIFFile) -> CIFFile:
-    """Fixes hydrogen atoms in the structure by adding them or converting D to H."""
-    s = get_structure_data(cif)
-    return cif_new_with(cif, add_h(del_h(s)))
-
-
-def filter_chain(cif: CIFFile, chain_id: str) -> CIFFile:
-    """Discards every chain excpt the one which whose ID is given."""
-    s = get_structure_data(cif)
-    if isinstance(s, AtomArrayStack):
-        s = s[:, s.chain_id == chain_id]
-    else:
-        s = s[s.chain_id == chain_id]
-    return cif_new_with(cif, s)
 
 
 def process_files(files: list[str]) -> None:
@@ -156,38 +100,37 @@ def process_files(files: list[str]) -> None:
         pdbid = os.path.splitext(os.path.basename(file))[0]
         name, ext = os.path.splitext(os.path.normpath(file))
         print("\x1b[F\x1b[Kprocessing", pdbid)
+        if not override and os.path.exists(name + "_PCSD" + ext):
+            continue
 
         cif: CIFFile = CIFFile.read(file)
 
-        noalt_file = name + "_noalt" + ext
-        if not override and os.path.exists(noalt_file):
-            cif.read(noalt_file)
-        else:
-            cif = remove_altlocs(cif)
-            cif.write(noalt_file)
+        # getting the structure data will remove alternate locations
+        struct = get_structure_data(cif)
 
-        aaonly_file = name + "_aaonly" + ext
-        if not override and os.path.exists(aaonly_file):
-            cif.read(aaonly_file)
-        else:
-            cif = filter_aa(cif)
-            cif.write(aaonly_file)
+        if not isinstance(struct, AtomArrayStack):
+            struct = stack(struct)
 
-        withh_file = name + "_withh" + ext
-        if not override and os.path.exists(withh_file):
-            cif.read(withh_file)
-        else:
-            cif = fix_h(cif)
-            cif.write(withh_file)
+        # remove non-residue atoms that we don't care about
+        struct = struct[:, filter_amino_acids(struct)]
 
-        fchain_file = name + "_fchain" + ext
-        if not override and os.path.exists(fchain_file):
-            pass
-        else:
-            if pdbid in chains and chains[pdbid] != "":
-                cif = filter_chain(cif, chains[pdbid])
-            cif.write(fchain_file)
+        # filter for only the chain we want
+        if pdbid in chains and chains[pdbid] != "":
+            struct = struct[:, struct.chain_id == chains[pdbid]]
 
+        # filter out existing hydrogen and deuterium
+        struct = struct[:, ~(struct.element == "H")]
+        struct = struct[:, ~(struct.element == "D")]
+
+        arrays = []
+        for a in struct:
+            a, _ = add_hydrogen(a)
+            a.coord = relax_hydrogen(a, iterations=4096)
+            arrays.append(a)
+        struct = stack(arrays)
+
+        cif = cif_new_with(cif, struct)
+        cif.write(name + "_P" + ext)
 
 def main() -> None:
     global infile, outdir, override, skip
