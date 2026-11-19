@@ -59,7 +59,7 @@ def add_to_angles(angles: np.ndarray | None, batch: list[list[str]]) -> np.ndarr
         `STRUCTURE, RESNUM, TIME_NS, ENERGY, ANGLE1, ...`
     """
     if angles is None:
-        angles = np.zeros((72, len(batch[0])))
+        angles = np.zeros((72, len(batch[0]) - 4))
     count = len(batch)
     for entry in batch:
         for angle in range(4, len(entry)):
@@ -97,24 +97,26 @@ def read_res_data(
     return heatmap, angles
 
 
-def plot_heatmap(heatmap: np.ndarray) -> Axes:
+def plot_heatmap(heatmap: np.ndarray, name: str) -> Axes:
     plt.figure()
-    ax = plt.subplot()
+    ax: Axes = plt.subplot()
     heatmap = np.flip(heatmap, 0)
     ax.imshow(heatmap, "inferno_r", alpha=np.clip(heatmap, 0, 1))
-    ax.set_xticks([x * 6 for x in range(12)], [x * 30 for x in range(12)])
-    ax.set_yticks([x * 6 + 5 for x in range(12)], [330 - x * 30 for x in range(12)])
+    ax.set_xticks([x * 6 for x in range(12)], [str(x * 30) for x in range(12)])
+    ax.set_yticks([x * 6 + 5 for x in range(12)], [str(330 - x * 30) for x in range(12)])
     ax.set_xlabel("Χ1")
     ax.set_ylabel("Χ2")
+    ax.set_title(name)
     return ax
 
 
-def plot_angles(angles) -> Axes:
+def plot_angles(angles: np.ndarray, name: str) -> Axes:
     plt.figure()
     ax: Axes = plt.subplot()
-    ax.plot(angles)
-    ax.legend([f"X{x}" for x in range(angles.shape[1])])
+    ax.plot(angles / angles.max(0))
+    ax.legend([f"X{x + 1}" for x in range(angles.shape[1])])
     ax.set_xticks([x * 6 for x in range(12)], [f"{x * 30}°" for x in range(12)])
+    ax.set_title(name)
     return ax
 
 
@@ -122,11 +124,11 @@ def main(indir: str, outdir: str) -> None:
     for res in resnames:
         heatmap, angles = read_res_data(indir, res)
         if heatmap is not None:
-            plot_heatmap(heatmap)
+            plot_heatmap(heatmap, res.upper())
             plt.savefig(os.path.join(outdir, res + "-heatmap.png"))
             plt.close()
         if angles is not None:
-            plot_angles(angles)
+            plot_angles(angles, res.upper())
             plt.savefig(os.path.join(outdir, res + ".png"))
             plt.close()
 

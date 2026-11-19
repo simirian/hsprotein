@@ -138,7 +138,8 @@ def add_structure_dihedrals(structure: AtomArray | AtomArrayStack, name: str, ou
             atoms = get_dihedral_atoms(structure, res_id, name, res_dihedrals[i], missing)
             if atoms is not None:
                 angle = dihedral(*atoms)[0] if atoms else np.nan
-                res_angles.append((int(np.rad2deg(angle) / 5) * 5 + 360) % 360)
+                # flip the angle because the dihedral function returns backwards angles
+                res_angles.append(int(-np.rad2deg(angle) + 360) % 360)
         angles[res_name].append((res_id, res_angles))
 
     with open(os.path.join(outdir, "missing.csv"), "a") as f:
