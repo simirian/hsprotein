@@ -1,12 +1,15 @@
 package edu.wpi.hsprotein;
 
 import java.io.FileWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 
 import org.biojava.nbio.structure.Chain;
 import org.biojava.nbio.structure.Group;
 import org.biojava.nbio.structure.ResidueNumber;
+import org.biojava.nbio.structure.asa.AsaCalculator;
+import org.biojava.nbio.structure.asa.GroupAsa;
 
 import edu.wpi.hsprotein.filemanager.ProteinManager;
 import edu.wpi.hsprotein.helpers.InputValidation;
@@ -99,11 +102,22 @@ class Main {
 		if (pManager.getStructure().getChains().size() < 1)
 			InputValidation.handleImproperUserInput("No valid chains");
 
+		// Get residues to rotate
+		// 960 probes is from https://boscoh.com/protein/calculating-the-solvent-accessible-surface-area-asa.html
+		// 1.4 Å radius is from google, I could not find a source :(
+		AsaCalculator asaCalculator = new AsaCalculator(pManager.getStructure(), 1.4, 960, 4, false);
+		GroupAsa[] asas = asaCalculator.getGroupAsas();
+		ArrayList<Group> groups = new ArrayList<>(asas.length);
+		for (GroupAsa asa : asas)
+			if (asa.getRelativeAsaU() < .2) // this means residues who have < 20% of their surface area accessible
+				groups.add(asa.getGroup());
+		groups.trimToSize();
+
 		// Rotate every residue in the structure
 		Chain proteinChain = pManager.getStructure().getChains().get(0);
 		HashMap<ResidueNumber, int[]> angles = new HashMap<ResidueNumber, int[]>();
 		System.out.println(""); // this is for the sake of the CUP in `runResidue()` so it doesn't overwrite anything important
-		for (Group residue : proteinChain.getSeqResGroups())
+		for (Group residue : groups)
 			angles.put(residue.getResidueNumber(), Main.runResidue(proteinChain, residue, fileName, outDir));
 
 		for (Group residue : proteinChain.getSeqResGroups()) {
