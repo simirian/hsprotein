@@ -80,9 +80,9 @@ class Main {
 		}
 		// Check file
 		String file = args[0];
-		int i = file.lastIndexOf('/');
-		String fileDirectory = i == -1 ? "./" : file.substring(0, i);
-		String fileName = i == 1 ? file : file.substring(file.lastIndexOf("/") + 1);
+		int slashIndex = file.lastIndexOf('/');
+		String fileDirectory = slashIndex == -1 ? "./" : file.substring(0, slashIndex);
+		String fileName = slashIndex == 1 ? file : file.substring(file.lastIndexOf("/") + 1);
 		InputValidation.validateFile(fileDirectory, fileName, "Invalid input file");
 		// Check if output directory exists
 		String outDir = InputValidation.validateDirectory(args[1], "Invalid output directory path");
@@ -111,9 +111,9 @@ class Main {
 		Chain proteinChain = pManager.getStructure().getChains().get(0);
 		List<Group> groups = proteinChain.getSeqResGroups();
 		ArrayList<Group> buriedGroups = new ArrayList<>(asas.length);
-		for (int j = 0; j < asas.length; ++j)
-			if (asas[j].getRelativeAsaU() < 0.2)
-				buriedGroups.add(groups.get(j));
+		for (int i = 0; i < asas.length; ++i)
+			if (asas[i].getRelativeAsaU() < 0.2)
+				buriedGroups.add(groups.get(i));
 		buriedGroups.trimToSize();
 
 		// Rotate every residue in the structure

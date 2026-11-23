@@ -39,16 +39,15 @@ class CIFManager implements ProteinManager {
 	}
 
 	@Override
-	public void export(String residueName) {
+	public void export(String fileName) {
 		// Find filename that doesn't exist in outputDirectory
-		int num = 1;
-		String structName = "rotated_" + (residueName != "" ? residueName : (struct.getName().equals("") ? "CIF_Protein" : struct.getName()));
-		String filename = structName + ".cif";
-		File file = new File(output_directory, filename);
-		while (file.exists()) {
-			filename = structName + "_" + (num++) + ".cif";
-			file = new File(output_directory, filename);
-		}
+		int num = 0;
+		int dot = fileName.lastIndexOf('.');
+		String root = fileName.substring(0, dot);
+		String ext = fileName.substring(dot);
+		File file = new File(output_directory, root + ext);
+		while (file.exists())
+			file = new File(output_directory, root + (++num) + ext);
 
 		// Write to CIF file
 		try (FileWriter writer = new FileWriter(file)) {
