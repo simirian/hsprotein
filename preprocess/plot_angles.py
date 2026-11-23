@@ -100,7 +100,7 @@ def read_res_data(
 def plot_heatmap(heatmap: np.ndarray, name: str) -> Axes:
     plt.figure()
     ax: Axes = plt.subplot()
-    heatmap = np.flip(heatmap, 0)
+    heatmap = np.flip(heatmap, 1)
     ax.imshow(heatmap, "inferno_r", alpha=np.clip(heatmap, 0, 1))
     ax.set_xticks([x * 6 for x in range(12)], [str(x * 30) for x in range(12)])
     ax.set_yticks([x * 6 + 5 for x in range(12)], [str(330 - x * 30) for x in range(12)])
