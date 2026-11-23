@@ -10,8 +10,9 @@ echo "STARTING EXECUTION AT $(date)"
 
 in=$(realpath $1)
 out=$(realpath $2)
+dir=$(which $0)
 mkdir -p $2
-cd $(which $0)
+cd ${dir%/*}
 mvn compile
 
 for file in $(ls $in); do
