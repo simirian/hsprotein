@@ -4,6 +4,7 @@ import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 
 import org.biojava.nbio.structure.Chain;
 import org.biojava.nbio.structure.Group;
@@ -107,17 +108,18 @@ class Main {
 		// 1.4 Å radius is from google, I could not find a source :(
 		AsaCalculator asaCalculator = new AsaCalculator(pManager.getStructure(), 1.4, 960, 4, false);
 		GroupAsa[] asas = asaCalculator.getGroupAsas();
-		ArrayList<Group> groups = new ArrayList<>(asas.length);
-		for (GroupAsa asa : asas)
-			if (asa.getRelativeAsaU() < .2) // this means residues who have < 20% of their surface area accessible
-				groups.add(asa.getGroup());
-		groups.trimToSize();
+		Chain proteinChain = pManager.getStructure().getChains().get(0);
+		List<Group> groups = proteinChain.getSeqResGroups();
+		ArrayList<Group> buriedGroups = new ArrayList<>(asas.length);
+		for (int j = 0; j < asas.length; ++j)
+			if (asas[j].getRelativeAsaU() < 0.2)
+				buriedGroups.add(groups.get(j));
+		buriedGroups.trimToSize();
 
 		// Rotate every residue in the structure
-		Chain proteinChain = pManager.getStructure().getChains().get(0);
 		HashMap<ResidueNumber, int[]> angles = new HashMap<ResidueNumber, int[]>();
 		System.out.println(""); // this is for the sake of the CUP in `runResidue()` so it doesn't overwrite anything important
-		for (Group residue : groups)
+		for (Group residue : buriedGroups)
 			angles.put(residue.getResidueNumber(), Main.runResidue(proteinChain, residue, fileName, outDir));
 
 		for (Group residue : proteinChain.getSeqResGroups()) {
