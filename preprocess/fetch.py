@@ -80,7 +80,7 @@ def cif_new_with(cif: CIFFile, structure: AtomArray | AtomArrayStack) -> CIFFile
             for model in cif.keys()  # noqa
         }
     )
-    set_structure(new, structure)
+    set_structure(new, structure, extra_fields=["B_iso_or_equiv"])
     for model in new.keys():  # noqa
         if "struct_conn" in new[model]:
             del new[model]["struct_conn"]
@@ -131,6 +131,7 @@ def process_files(files: list[str]) -> None:
 
         cif = cif_new_with(cif, struct)
         cif.write(name + "_P" + ext)
+
 
 def main() -> None:
     global infile, outdir, override, skip
