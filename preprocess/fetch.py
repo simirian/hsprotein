@@ -5,7 +5,7 @@ import sys
 from argparse import ArgumentParser
 
 from biotite.database.rcsb import fetch
-from biotite.structure import AtomArray, AtomArrayStack, filter_amino_acids, stack
+from biotite.structure import AtomArray, AtomArrayStack, filter_amino_acids
 from biotite.structure.io.pdbx import CIFBlock, CIFFile, get_structure, set_structure
 from hydride import add_hydrogen, relax_hydrogen  # type: ignore
 
@@ -58,11 +58,12 @@ def fetch_files() -> list[str]:
     return fetch(pdbids, "cif", outdir, verbose=True, overwrite=override)
 
 
-def get_structure_data(cif: CIFFile) -> AtomArray | AtomArrayStack:
+def get_structure_data(cif: CIFFile) -> AtomArray:
     """Gets structure data from a cif file in a way that is compatible with Biojava."""
-    return get_structure(
+    struct = get_structure(
         cif, include_bonds=True, extra_fields=["charge", "B_iso_or_equiv"]
     )
+    return struct if isinstance(struct, AtomArray) else struct[0]
 
 
 def cif_new_with(cif: CIFFile, structure: AtomArray | AtomArrayStack) -> CIFFile:
@@ -99,35 +100,29 @@ def process_files(files: list[str]) -> None:
     for file in files:
         pdbid = os.path.splitext(os.path.basename(file))[0]
         name, ext = os.path.splitext(os.path.normpath(file))
-        print("\x1b[F\x1b[Kprocessing", pdbid)
-        if not override and os.path.exists(name + "_PCSD" + ext):
+        if not override and os.path.exists(name + "_P" + ext):
             continue
 
+        print("\x1b[F\x1b[Kprocessing", pdbid)
         cif: CIFFile = CIFFile.read(file)
 
         # getting the structure data will remove alternate locations
         struct = get_structure_data(cif)
 
-        if not isinstance(struct, AtomArrayStack):
-            struct = stack(struct)
-
         # remove non-residue atoms that we don't care about
-        struct = struct[:, filter_amino_acids(struct)]
+        struct = struct[filter_amino_acids(struct)]
 
         # filter for only the chain we want
         if pdbid in chains and chains[pdbid] != "":
-            struct = struct[:, struct.chain_id == chains[pdbid]]
+            struct = struct[struct.chain_id == chains[pdbid]]
 
         # filter out existing hydrogen and deuterium
-        struct = struct[:, ~(struct.element == "H")]
-        struct = struct[:, ~(struct.element == "D")]
+        struct = struct[~(struct.element == "H")]
+        struct = struct[~(struct.element == "D")]
 
-        arrays = []
-        for a in struct:
-            a, _ = add_hydrogen(a)
-            a.coord = relax_hydrogen(a, iterations=4096)
-            arrays.append(a)
-        struct = stack(arrays)
+        # add hydrogen
+        struct, _ = add_hydrogen(struct)
+        struct.coord = relax_hydrogen(struct, iterations=4096)
 
         cif = cif_new_with(cif, struct)
         cif.write(name + "_P" + ext)
